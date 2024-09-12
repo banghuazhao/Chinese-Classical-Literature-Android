@@ -2,6 +2,7 @@
 
 阅读经典，体验中华经典古籍和文化！ This Android app provides a free reading experience of a vast collection of classical Chinese literature. Begin your journey through the depth of Chinese history, philosophy, and culture.
 
+[Download the app on Google Play](https://play.google.com/store/apps/details?id=com.appsbay.chineseclassicalliteratural)
 
 We have recently added the following titles to the app, expanding the collection of ancient Chinese literature:
 
