@@ -9,6 +9,7 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.HashMap;
@@ -19,24 +20,30 @@ public class LiteraryCopy {
 
     private final Map<String, String> books = new HashMap<>();
     private final Map<String, String> authors = new HashMap<>();
+    private final Map<String, String> traditionalBooks = new HashMap<>();
+    private final Map<String, String> traditionalAuthors = new HashMap<>();
 
     public void fetchFromLocal(Context context) {
-        if (!books.isEmpty() || !authors.isEmpty()) {
+        if (!books.isEmpty() && !authors.isEmpty()
+                && !traditionalBooks.isEmpty() && !traditionalAuthors.isEmpty()) {
             return;
         }
         loadMap(context, "literary_copy/books.json", books);
         loadMap(context, "literary_copy/authors.json", authors);
+        loadMap(context, "literary_copy/books-traditional.json", traditionalBooks);
+        loadMap(context, "literary_copy/authors-traditional.json", traditionalAuthors);
     }
 
     public String introductionFor(Book book) {
         if (book == null) {
             return null;
         }
-        String intro = books.get(normalize(book.getName()));
+        Map<String, String> copy = isTraditional(book) ? traditionalBooks : books;
+        String intro = copy.get(normalize(book.getName()));
         if (notBlank(intro)) {
             return intro;
         }
-        intro = books.get(normalize(book.getParent()));
+        intro = copy.get(normalize(book.getParent()));
         if (notBlank(intro)) {
             return intro;
         }
@@ -47,8 +54,13 @@ public class LiteraryCopy {
         if (book == null) {
             return null;
         }
-        String bio = authors.get(normalize(book.getAuthor()));
+        Map<String, String> copy = isTraditional(book) ? traditionalAuthors : authors;
+        String bio = copy.get(normalize(book.getAuthor()));
         return notBlank(bio) ? bio : null;
+    }
+
+    private static boolean isTraditional(Book book) {
+        return book.getBookType() != null && book.getBookType().name().endsWith("_Fan");
     }
 
     public enum MatchKind {
@@ -118,11 +130,15 @@ public class LiteraryCopy {
 
     private String readAsset(Context context, String assetPath) {
         try {
-            InputStream is = context.getAssets().open(assetPath);
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            is.close();
-            return new String(buffer, StandardCharsets.UTF_8);
+            try (InputStream input = context.getAssets().open(assetPath);
+                 ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, count);
+                }
+                return new String(output.toByteArray(), StandardCharsets.UTF_8);
+            }
         } catch (IOException e) {
             Log.e("LiteraryCopy", "Missing asset " + assetPath, e);
             return null;

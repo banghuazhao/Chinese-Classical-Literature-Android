@@ -602,13 +602,12 @@ public class BookPagerActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                getOnBackPressedDispatcher().onBackPressed();
-                return true;
-            case R.id.nav_book_pager_more:
-                showReaderOptions();
-                return true;
+        if (id == android.R.id.home) {
+            getOnBackPressedDispatcher().onBackPressed();
+            return true;
+        } else if (id == R.id.nav_book_pager_more) {
+            showReaderOptions();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

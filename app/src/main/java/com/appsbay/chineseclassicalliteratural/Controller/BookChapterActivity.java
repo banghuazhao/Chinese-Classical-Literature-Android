@@ -266,15 +266,14 @@ public class BookChapterActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.nav_book_chapter_info:
-                if (book != null) {
-                    AuthorBioSheet.showBook(this, book);
-                }
-                return true;
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else if (id == R.id.nav_book_chapter_info) {
+            if (book != null) {
+                AuthorBioSheet.showBook(this, book);
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

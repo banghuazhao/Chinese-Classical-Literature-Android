@@ -375,21 +375,20 @@ public class BooksFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case R.id.home_menu_action_change:
-                if (viewFlipper.getDisplayedChild() == 0) {
-                    item.setIcon(changeDrawableColor(mContext, R.drawable.nav_grid22, MyColor.getTitleTextColor(mContext)));
-                    viewFlipperChild = 1;
-                } else {
-                    item.setIcon(changeDrawableColor(mContext, R.drawable.nav_list_bullet, MyColor.getTitleTextColor(mContext)));
-                    viewFlipperChild = 0;
-                }
-                viewFlipper.showNext();
-                lastResultCount = currentVisibleResultCount();
-                refreshSearchPanel();
-                return true;
-            case R.id.home_menu_action_search:
-                return true;
+        if (id == R.id.home_menu_action_change) {
+            if (viewFlipper.getDisplayedChild() == 0) {
+                item.setIcon(changeDrawableColor(mContext, R.drawable.nav_grid22, MyColor.getTitleTextColor(mContext)));
+                viewFlipperChild = 1;
+            } else {
+                item.setIcon(changeDrawableColor(mContext, R.drawable.nav_list_bullet, MyColor.getTitleTextColor(mContext)));
+                viewFlipperChild = 0;
+            }
+            viewFlipper.showNext();
+            lastResultCount = currentVisibleResultCount();
+            refreshSearchPanel();
+            return true;
+        } else if (id == R.id.home_menu_action_search) {
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

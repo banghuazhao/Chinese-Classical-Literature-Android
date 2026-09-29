@@ -148,28 +148,28 @@ public class MainActivity extends AppCompatActivity {
 
     private final BottomNavigationView.OnNavigationItemSelectedListener navListener =
             item -> {
-                switch (item.getItemId()) {
-                    case R.id.nav_home:
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
-                                .hide(active).show(fragment1).commit();
-                        active = fragment1;
-                        setDestinationTitle(R.string.app_name);
-                        return true;
-                    case R.id.nav_library:
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
-                                .hide(active).show(fragment2).commit();
-                        active = fragment2;
-                        setDestinationTitle(R.string.My_Library);
-                        return true;
-                    case R.id.nav_more:
-                        fm.beginTransaction()
-                                .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
-                                .hide(active).show(fragment3).commit();
-                        active = fragment3;
-                        setDestinationTitle(R.string.Menu);
-                        return true;
+                int id = item.getItemId();
+                if (id == R.id.nav_home) {
+                    fm.beginTransaction()
+                            .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
+                            .hide(active).show(fragment1).commit();
+                    active = fragment1;
+                    setDestinationTitle(R.string.app_name);
+                    return true;
+                } else if (id == R.id.nav_library) {
+                    fm.beginTransaction()
+                            .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
+                            .hide(active).show(fragment2).commit();
+                    active = fragment2;
+                    setDestinationTitle(R.string.My_Library);
+                    return true;
+                } else if (id == R.id.nav_more) {
+                    fm.beginTransaction()
+                            .setCustomAnimations(R.anim.shelf_view_enter, R.anim.shelf_view_exit)
+                            .hide(active).show(fragment3).commit();
+                    active = fragment3;
+                    setDestinationTitle(R.string.Menu);
+                    return true;
                 }
                 return false;
             };

@@ -280,12 +280,11 @@ public class BooksListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.home_menu_action_search:
-                return true;
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else if (id == R.id.home_menu_action_search) {
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

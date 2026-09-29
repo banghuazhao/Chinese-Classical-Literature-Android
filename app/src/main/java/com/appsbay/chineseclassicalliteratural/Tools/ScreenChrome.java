@@ -155,7 +155,7 @@ public final class ScreenChrome {
         if (applyBackIcon) {
             toolbar.setNavigationIcon(MyImage.changeDrawableColor(
                     activity,
-                    R.drawable.abc_ic_ab_back_material,
+                    androidx.appcompat.R.drawable.abc_ic_ab_back_material,
                     MyColor.getButtonTintColor(activity)
             ));
         }

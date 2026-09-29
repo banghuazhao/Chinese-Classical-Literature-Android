@@ -34,15 +34,15 @@ if (AdMobAppId == null) {
 }
 
 android {
-    namespace 'com.appsbay.chineseclassicalliteratural'
-    compileSdk 37
+    namespace = 'com.appsbay.chineseclassicalliteratural'
+    compileSdk = 37
 
     defaultConfig {
         applicationId "com.appsbay.chineseclassicalliteratural"
-        minSdk 23
-        targetSdk 37
-        versionCode 13
-        versionName "1.2.0"
+        minSdk = 23
+        targetSdk = 37
+        versionCode = 13
+        versionName = "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [AdMobAppId: AdMobAppId]
@@ -51,19 +51,19 @@ android {
     signingConfigs {
         release {
             if (hasKeystore) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
             }
         }
     }
 
     buildTypes {
         release {
-            if (hasKeystore) signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
+            if (hasKeystore) signingConfig = signingConfigs.release
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
 
@@ -83,12 +83,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        buildConfig true
-        resValues true
+        buildConfig = true
+        resValues = true
     }
     lint {
         // Reported against Picasso's RemoteViews notification API, which this app never calls.
