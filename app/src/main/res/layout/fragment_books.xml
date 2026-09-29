@@ -1,41 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="true"
+    android:clipToPadding="true"
+    android:orientation="vertical"
+    tools:context=".Controller.BooksFragment">
 
-
-    <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/main_view_flipper"
+    <include
+        android:id="@+id/genre_chips_include"
+        layout="@layout/include_genre_chips"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/main_category_recycler_view"
+    <include
+        android:id="@+id/search_panel_include"
+        layout="@layout/include_search_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipChildren="true">
+
+        <ViewFlipper
+            android:id="@+id/main_view_flipper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:measureAllChildren="true"
+            android:inAnimation="@anim/shelf_view_enter"
+            android:outAnimation="@anim/shelf_view_exit">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/main_list_recycler_view"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/main_category_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                android:overScrollMode="never"
+                android:paddingTop="@dimen/space_4"
+                android:paddingBottom="@dimen/space_16"
+                android:scrollbars="none"
+                tools:listitem="@layout/row_book_category" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/main_list_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="true"
+                android:overScrollMode="never"
+                android:paddingTop="@dimen/space_4"
+                android:paddingBottom="@dimen/space_16"
+                android:scrollbars="none"
+                tools:listitem="@layout/row_book" />
+
+        </ViewFlipper>
+
+        <include
+            android:id="@+id/search_empty_include"
+            layout="@layout/include_search_empty"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
-
-    </ViewFlipper>
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewBanner"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         app:adSize="BANNER"
-        app:adUnitId="@string/adBannerID"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-    </com.google.android.gms.ads.AdView>
+        app:adUnitId="@string/adBannerID" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

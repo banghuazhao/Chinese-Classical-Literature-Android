@@ -1,17 +1,34 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.NovelsHub" parent="Theme.AppCompat.Light">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/brown</item>
-        <item name="colorPrimaryVariant">@color/brown</item>
-        <item name="colorOnPrimary">@color/brown</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/brown</item>
-        <item name="colorSecondaryVariant">@color/brown</item>
-        <item name="colorOnSecondary">@color/brown</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+    <style name="Theme.NovelsHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/paper</item>
+        <item name="colorPrimaryDark">@color/paper_deep</item>
+        <item name="colorPrimaryVariant">@color/paper</item>
+        <item name="colorOnPrimary">@color/ink</item>
+        <item name="colorSecondary">@color/gold</item>
+        <item name="colorSecondaryVariant">@color/gold</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/gold</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/paper</item>
+        <item name="android:navigationBarColor" tools:targetApi="l">@color/paper</item>
+        <item name="android:windowBackground">@color/paper</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="actionBarStyle">@style/Widget.NovelsHub.ActionBar</item>
+        <item name="bottomNavigationStyle">@style/Widget.NovelsHub.BottomNav</item>
+        <item name="colorControlActivated">@color/gold</item>
+        <item name="android:colorControlActivated">@color/gold</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/ink_muted</item>
+        <item name="homeAsUpIndicator">@drawable/abc_ic_ab_back_material</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="alertDialogTheme">@style/Theme.NovelsHub.AlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/Theme.NovelsHub.AlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/Theme.NovelsHub.BottomSheet</item>
+        <item name="android:windowAnimationStyle">@style/Animation.NovelsHub.Activity</item>
     </style>
 
+    <style name="Theme.NovelsHub.NoActionBar" parent="Theme.NovelsHub">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

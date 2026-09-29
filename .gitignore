@@ -23,3 +23,6 @@ app/google-services.json
 .idea/
 
 app/release
+shinebuttonlib/build
+keystore.properties
+.kotlin/

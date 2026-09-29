@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cover_viewer_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E6121212"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/cover_viewer_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/book_cover"
+        android:paddingStart="@dimen/space_24"
+        android:paddingTop="@dimen/space_40"
+        android:paddingEnd="@dimen/space_24"
+        android:paddingBottom="@dimen/space_40"
+        android:scaleType="fitCenter"
+        android:src="@drawable/cover_placeholder"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/cover_viewer_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_8"
+        android:paddingTop="@dimen/space_8"
+        android:paddingEnd="@dimen/space_8"
+        android:paddingBottom="@dimen/space_8">
+
+        <ImageButton
+            android:id="@+id/cover_viewer_close"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="@drawable/bg_cover_viewer_chrome"
+            android:contentDescription="@string/close"
+            android:padding="@dimen/space_12"
+            android:scaleType="centerInside"
+            android:src="@drawable/nav_close"
+            app:tint="@android:color/white" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/cover_viewer_info"
+            android:layout_width="@dimen/touch_min"
+            android:layout_height="@dimen/touch_min"
+            android:background="@drawable/bg_cover_viewer_chrome"
+            android:contentDescription="@string/About_this_book"
+            android:padding="@dimen/space_12"
+            android:scaleType="centerInside"
+            android:src="@drawable/nav_info"
+            app:tint="@android:color/white"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+</FrameLayout>

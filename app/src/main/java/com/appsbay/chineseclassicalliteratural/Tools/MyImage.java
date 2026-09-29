@@ -6,7 +6,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.widget.ViewFlipper;
 
 import androidx.core.content.ContextCompat;
 
@@ -20,34 +19,10 @@ public class MyImage {
         return mDrawable;
     }
 
-    static public void setBackgroundImage(Context context, View view) {
-        SharedPreferences preferences = context.getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
-        String backgroundColorName = preferences.getString("background", "default");
-        switch (backgroundColorName) {
-            case "bg":
-                view.setBackgroundResource(R.drawable.bg);
-                break;
-            case "bg1":
-                view.setBackgroundResource(R.drawable.bg1);
-                break;
-            case "bg2":
-                view.setBackgroundResource(R.drawable.bg2);
-                break;
-            case "bg3":
-                view.setBackgroundResource(R.drawable.bg3);
-                break;
-            case "bg4":
-                view.setBackgroundResource(R.drawable.bg4);
-                break;
-            case "bg5":
-                view.setBackgroundResource(R.drawable.bg5);
-                break;
-            default:
-                return;
+    public static void setBackgroundImage(Context context, View view) {
+        if (view == null) {
+            return;
         }
-    }
-
-    public static void setBackgroundImage(Context context, ViewFlipper view) {
         SharedPreferences preferences = context.getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
         String backgroundColorName = preferences.getString("background", "default");
         switch (backgroundColorName) {
@@ -68,6 +43,9 @@ public class MyImage {
                 break;
             case "bg5":
                 view.setBackgroundResource(R.drawable.bg5);
+                break;
+            case "default":
+                view.setBackgroundResource(R.drawable.bg_paper);
                 break;
             default:
                 return;

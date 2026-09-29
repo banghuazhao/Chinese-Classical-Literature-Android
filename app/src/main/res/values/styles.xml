@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance.NovelsHub.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Display" parent="TextAppearance.AppCompat.Display1">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Title" parent="TextAppearance.AppCompat.Title">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Body" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">@font/librebaskerville_regular</item>
+        <item name="fontFamily">@font/librebaskerville_regular</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:lineSpacingMultiplier">1.45</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.ShelfTitle" parent="TextAppearance.NovelsHub.Title">
+        <item name="android:textSize">22sp</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.BookTitle" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingMultiplier">1.15</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.BookAuthor" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/ink_muted</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.ListTitle" parent="TextAppearance.NovelsHub.BookTitle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.ListAuthor" parent="TextAppearance.NovelsHub.BookAuthor">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.SectionLabel" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/gold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Intro" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">@font/librebaskerville_regular</item>
+        <item name="fontFamily">@font/librebaskerville_regular</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingMultiplier">1.45</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:hyphenationFrequency">normal</item>
+        <item name="android:breakStrategy">high_quality</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.ReaderNav" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.SeeAll" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/gold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Widget.NovelsHub.ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="background">@color/paper</item>
+        <item name="elevation">0dp</item>
+        <item name="titleTextStyle">@style/TextAppearance.NovelsHub.ActionBar.Title</item>
+    </style>
+
+    <style name="Widget.NovelsHub.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="titleTextAppearance">@style/TextAppearance.NovelsHub.ActionBar.Title</item>
+        <item name="android:background">@color/paper</item>
+        <item name="titleTextColor">@color/ink</item>
+        <item name="android:elevation">0dp</item>
+        <item name="contentInsetStartWithNavigation">16dp</item>
+    </style>
+
+    <style name="Widget.NovelsHub.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="elevation">12dp</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="itemRippleColor">@color/ripple_gold</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.NovelsHub.Nav.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.NovelsHub.Nav</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Nav" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.Nav.Active" parent="TextAppearance.NovelsHub.Nav">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Theme.NovelsHub.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorSecondary">@color/gold</item>
+        <item name="colorAccent">@color/gold</item>
+        <item name="colorSurface">@color/paper</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="android:colorBackground">@color/paper</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/TextAppearance.NovelsHub.DialogTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.NovelsHub.DialogBody</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.NovelsHub.DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.NovelsHub.DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.NovelsHub.DialogButton</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.NovelsHub.Dialog</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.DialogTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:fontFamily">@font/cormorant_semibold</item>
+        <item name="fontFamily">@font/cormorant_semibold</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="TextAppearance.NovelsHub.DialogBody" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:fontFamily">@font/librebaskerville_regular</item>
+        <item name="fontFamily">@font/librebaskerville_regular</item>
+        <item name="android:textColor">@color/ink_muted</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingMultiplier">1.35</item>
+    </style>
+
+    <style name="Widget.NovelsHub.DialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/gold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="rippleColor">@color/ripple_gold</item>
+    </style>
+
+    <style name="ShapeAppearance.NovelsHub.Dialog" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="Theme.NovelsHub.BottomSheet" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.NovelsHub.ModalBottomSheet</item>
+        <item name="android:colorBackground">@color/paper</item>
+        <item name="colorSurface">@color/paper</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorPrimary">@color/gold</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:navigationBarColor">@color/paper</item>
+        <item name="enableEdgeToEdge">true</item>
+    </style>
+
+    <style name="Widget.NovelsHub.ModalBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/paper</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.NovelsHub.LargeComponent</item>
+        <item name="behavior_skipCollapsed">true</item>
+        <item name="paddingBottomSystemWindowInsets">true</item>
+        <item name="paddingLeftSystemWindowInsets">true</item>
+        <item name="paddingRightSystemWindowInsets">true</item>
+    </style>
+
+    <style name="ShapeAppearance.NovelsHub.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="Widget.NovelsHub.ContinueButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">@color/ripple_gold</item>
+    </style>
+
+    <style name="Widget.NovelsHub.SheetAction" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:paddingStart">@dimen/page_gutter</item>
+        <item name="android:paddingEnd">@dimen/page_gutter</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textAppearance">@style/TextAppearance.NovelsHub.ListTitle</item>
+        <item name="iconPadding">16dp</item>
+        <item name="iconSize">22dp</item>
+        <item name="rippleColor">@color/ripple_gold</item>
+        <item name="cornerRadius">0dp</item>
+    </style>
+
+    <style name="Animation.NovelsHub.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/activity_open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/activity_open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/activity_close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/activity_close_exit</item>
+    </style>
+
+    <style name="Theme.NovelsHub.CoverViewer" parent="ThemeOverlay.MaterialComponents.Dark">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@style/Animation.NovelsHub.CoverViewer</item>
+    </style>
+
+    <style name="Animation.NovelsHub.CoverViewer" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/cover_viewer_enter</item>
+        <item name="android:windowExitAnimation">@anim/cover_viewer_exit</item>
+    </style>
+</resources>

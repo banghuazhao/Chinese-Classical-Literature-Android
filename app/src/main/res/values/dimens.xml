@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_4">4dp</dimen>
+    <dimen name="space_8">8dp</dimen>
+    <dimen name="space_12">12dp</dimen>
+    <dimen name="space_16">16dp</dimen>
+    <dimen name="space_20">20dp</dimen>
+    <dimen name="space_24">24dp</dimen>
+    <dimen name="space_32">32dp</dimen>
+    <dimen name="space_40">40dp</dimen>
+
+    <dimen name="page_gutter">20dp</dimen>
+    <dimen name="reader_gutter">24dp</dimen>
+    <dimen name="reader_text_max_width">680dp</dimen>
+    <dimen name="shelf_item_gap">12dp</dimen>
+    <dimen name="shelf_header_height">48dp</dimen>
+    <dimen name="star_visual">22dp</dimen>
+    <dimen name="star_scrim_size">32dp</dimen>
+
+    <dimen name="cover_width">124dp</dimen>
+    <dimen name="cover_height">186dp</dimen>
+    <dimen name="cover_radius">4dp</dimen>
+    <dimen name="panel_radius">14dp</dimen>
+    <dimen name="cover_elevation">2dp</dimen>
+    <dimen name="cover_spine_width">8dp</dimen>
+    <dimen name="cover_page_width">4dp</dimen>
+
+    <dimen name="shelf_overlap">6dp</dimen>
+    <dimen name="shelf_lip_height">3dp</dimen>
+    <dimen name="shelf_groove_height">2dp</dimen>
+    <dimen name="shelf_face_height">20dp</dimen>
+    <dimen name="shelf_under_height">8dp</dimen>
+    <!-- lip + groove + face + under - overlap -->
+    <dimen name="shelf_below_cover">27dp</dimen>
+
+    <dimen name="list_cover_width">72dp</dimen>
+    <dimen name="list_cover_height">108dp</dimen>
+    <dimen name="list_cover_elevation">4dp</dimen>
+    <dimen name="list_cover_spine_width">6dp</dimen>
+
+    <dimen name="chip_stroke">1dp</dimen>
+    <dimen name="touch_min">48dp</dimen>
+    <dimen name="bottom_nav_height">64dp</dimen>
+    <dimen name="ad_spacer">72dp</dimen>
+</resources>

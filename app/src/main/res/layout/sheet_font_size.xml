@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_24">
+
+    <View
+        android:id="@+id/sheet_handle"
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/space_12"
+        android:layout_marginBottom="@dimen/space_8"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="@dimen/page_gutter"
+        android:paddingEnd="@dimen/page_gutter"
+        android:text="@string/Font_Size"
+        android:textAppearance="@style/TextAppearance.NovelsHub.SectionLabel" />
+
+    <TextView
+        android:id="@+id/sheet_font_size_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/cormorant_semibold"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:paddingTop="@dimen/space_4"
+        android:paddingBottom="@dimen/space_8"
+        android:textSize="32sp"
+        android:text="18" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sheet_font_size_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_gutter"
+        android:layout_marginEnd="@dimen/page_gutter"
+        android:contentDescription="@string/Font_Size"
+        android:valueFrom="12"
+        android:valueTo="40"
+        android:stepSize="1"
+        app:haloColor="@color/ripple_gold"
+        app:labelBehavior="gone"
+        app:thumbColor="@color/gold"
+        app:trackColorActive="@color/gold"
+        app:trackColorInactive="@color/hairline" />
+
+</LinearLayout>

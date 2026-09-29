@@ -22,6 +22,10 @@ This Android app provides a free reading experience of a vast collection of clas
 ## Features
 
 - **Bookmarking**: Save your reading progress at any time, allowing you to resume where you left off.
+- **Bookshelves and Search**: Browse by category, search titles and authors, and organize favorites.
+- **Simplified and Traditional Text**: Select the book script independently of the app interface language.
+- **Interface Language**: Choose an app language from the More screen.
+- **Offline Reading**: All included books are bundled with the app.
 - **Font Size Adjustment**: Adjust the font size to match your reading preference.
 - **Custom Reading Background**: Enjoy beautiful wallpaper backgrounds to enhance your reading experience, and switch backgrounds according to your personal taste.
 - **AdMob Integration**: This app uses Google AdMob for ads.
@@ -37,7 +41,7 @@ git clone https://github.com/banghuazhao/Chinese-Classical-Literature-Android.gi
 ```
 
 ### 2. Open the Project
-Open the project in Android Studio.
+Open the project in Android Studio with JDK 17 or newer. The project uses Gradle 9.7 and Android SDK 37.
 
 ### 3. Set Up Google AdMob
 This app uses AdMob integration, and you need to set up the google-services.json file for the app to run correctly with ads.
@@ -49,7 +53,7 @@ This app uses AdMob integration, and you need to set up the google-services.json
 5. Place the google-services.json file in the following directory:
 
 ```bash
-app/src/google-services.json
+app/google-services.json
 ```
 
 ### 4. Build and Run the App
@@ -59,13 +63,17 @@ Build and run the app on an Android emulator or physical device.
 
 ## Available Books
 
-A rich collection of Chinese classics, including but not limited to:
+The app bundles 59 works in both simplified and traditional Chinese. Highlights include:
 
-大唐西域记, 隋唐演义, 鹤冠子, 关尹子, 吕氏春秋, 醒世恒言, 二刻拍案惊奇, 公孙龙子, 墨子, 文子, 尉缭子, 列子, 千家诗, 浮生六记, 隋炀帝艳史, 颜氏家训, 荀子, 淮南子, 梦溪笔谈, 初刻拍案惊奇, 文心雕龙, 管子, 周易, 豆棚闲话, 山海经, 菜根谭, 镜花缘, 道德经, 中庸, 大学, 尚书, 论语, 古文观止, 喻世明言, 孙子兵法, 东周列国志, 孝经, 桃花扇, 洛神赋, 金石缘, 封神演义, 儒林外史, 孟子, 庄子, 冰鉴, 韩非子, 商君书, 礼记, 左传, 老残游记
+- Classics: 论语, 孟子, 大学, 中庸, 诗经, 尚书, 礼记, 周易, 左传.
+- Philosophy: 道德经, 庄子, 孙子兵法, 墨子, 韩非子, 荀子, 吕氏春秋.
+- Novels: 三国演义, 水浒传, 西游记, 红楼梦, 儒林外史, 封神演义, 镜花缘.
+- Poetry and prose: 楚辞, 唐诗三百首, 千家诗, 古文观止, 山海经, 文心雕龙, 梦溪笔谈.
+
+The added poetry texts are adapted from [chinese-poetry](https://github.com/chinese-poetry/chinese-poetry) under the MIT license. The full notice is in [THIRD_PARTY_NOTICES.txt](app/src/main/assets/THIRD_PARTY_NOTICES.txt).
 
 ---
 
 ## Contributions
 
 Contributions are welcome! Feel free to open issues or submit pull requests if you encounter bugs or have suggestions for new features.
-

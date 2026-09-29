@@ -4,70 +4,72 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.appsbay.chineseclassicalliteratural.Controller.Menu.MenuActivity;
 import com.appsbay.chineseclassicalliteratural.Model.Book;
-import com.appsbay.chineseclassicalliteratural.Model.BookLibrary;
-import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.R;
-import com.appsbay.chineseclassicalliteratural.Tools.Constants;
+import com.appsbay.chineseclassicalliteratural.Tools.AdsHelper;
+import com.appsbay.chineseclassicalliteratural.Tools.BookMotion;
+import com.appsbay.chineseclassicalliteratural.Tools.LocalBroadcastHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
+import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
+import com.appsbay.chineseclassicalliteratural.Tools.SearchChrome;
+import com.appsbay.chineseclassicalliteratural.Tools.SearchHistory;
+import com.appsbay.chineseclassicalliteratural.Tools.SearchPanelBinder;
 import com.appsbay.chineseclassicalliteratural.View.BooksLibraryListRecyclerViewAdapter;
-import com.appsbay.chineseclassicalliteratural.View.BooksListRecyclerViewAdapter;
-import com.google.android.gms.ads.AdRequest;
+import com.appsbay.chineseclassicalliteratural.viewmodel.LibraryViewModel;
+import com.appsbay.chineseclassicalliteratural.viewmodel.NovelsHubViewModelFactory;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class LibraryFragment extends Fragment {
+public class LibraryFragment extends Fragment implements BooksLibraryListRecyclerViewAdapter.OnStartDragListener {
 
     RecyclerView booksListRecyclerView;
     BooksLibraryListRecyclerViewAdapter booksListRecyclerViewAdapter;
     private Menu menu;
     private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
     Context mContext;
-    private ArrayList<Book> books;
+    private LibraryViewModel libraryViewModel;
+    private ItemTouchHelper itemTouchHelper;
+    private boolean dragEnabled = true;
+
+    private TextView textView;
+    private TextView emptySubtitle;
+    private View emptyLibrary;
+    private SearchView searchView;
+    private MenuItem searchMenuItem;
+    private boolean searchExpanded;
+    private String lastQuery = "";
+    private int lastResultCount;
 
     public LibraryFragment() {
         setHasOptionsMenu(true);
@@ -77,6 +79,10 @@ public class LibraryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        libraryViewModel = new ViewModelProvider(
+                this,
+                new NovelsHubViewModelFactory(requireActivity().getApplication())
+        ).get(LibraryViewModel.class);
     }
 
     @Nullable
@@ -87,160 +93,261 @@ public class LibraryFragment extends Fragment {
         mContext = getContext();
 
         mAdView = view.findViewById(R.id.adViewBanner);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        AdsHelper.bindBanner(mAdView);
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(changeDrawableColor(mContext, R.drawable.nav_more, MyColor.getButtonTintColor(mContext)));
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
 
         booksListRecyclerView = view.findViewById(R.id.library_list_recycler_view);
+        emptyLibrary = view.findViewById(R.id.empty_library);
+        textView = view.findViewById(R.id.textView_nodata);
+        emptySubtitle = view.findViewById(R.id.textView_nodata_subtitle);
 
-        books = BookLibrary.shared.books(mContext);
-        booksListRecyclerViewAdapter = new BooksLibraryListRecyclerViewAdapter(mContext, BookLibrary.shared.books(mContext));
+        booksListRecyclerViewAdapter = new BooksLibraryListRecyclerViewAdapter(mContext, new ArrayList<>(), this);
         booksListRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
         booksListRecyclerView.setAdapter(booksListRecyclerViewAdapter);
+        attachDragAndDrop();
 
-        configColor();
+        libraryViewModel.getBooks().observe(getViewLifecycleOwner(), books -> {
+            String query = libraryViewModel.getSearchQuery().getValue();
+            lastQuery = query == null ? "" : query;
+            booksListRecyclerViewAdapter.replaceBooks(new ArrayList<>(books));
+            booksListRecyclerViewAdapter.setSearchQuery(lastQuery);
+            dragEnabled = lastQuery.trim().isEmpty();
+            booksListRecyclerViewAdapter.setDragEnabled(dragEnabled);
+            lastResultCount = books == null ? 0 : books.size();
+            updateEmptyState(lastResultCount);
+            refreshSearchPanel();
+        });
+
+        libraryViewModel.getSearchQuery().observe(getViewLifecycleOwner(), query -> {
+            lastQuery = query == null ? "" : query;
+            booksListRecyclerViewAdapter.setSearchQuery(lastQuery);
+            lastResultCount = booksListRecyclerViewAdapter.getItemCount();
+            refreshSearchPanel();
+        });
+
+        configColor(view);
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
                 new IntentFilter("NotificationBackgroundChange"));
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(notificationLibraryBookChange,
-                new IntentFilter(Constants.NotificationLibraryBookChange));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(adFreeReceiver,
+                new IntentFilter(LocalBroadcastHelper.ACTION_AD_FREE_CHANGED));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(offlineDownloadReceiver,
+                new IntentFilter(LocalBroadcastHelper.ACTION_OFFLINE_DOWNLOAD_CHANGED));
 
         return view;
     }
 
+    private void refreshSearchPanel() {
+        if (mContext == null || getView() == null) {
+            return;
+        }
+        SearchPanelBinder.update(
+                requireView(),
+                searchExpanded,
+                lastQuery,
+                lastResultCount,
+                null,
+                SearchHistory.get(mContext),
+                libraryViewModel.popularAuthors(8),
+                new SearchPanelBinder.Callbacks() {
+                    @Override
+                    public void onSuggestionSelected(@NonNull String suggestion) {
+                        SearchHistory.add(mContext, suggestion);
+                        libraryViewModel.setSearchQuery(suggestion);
+                        if (searchView != null) {
+                            searchView.setQuery(suggestion, false);
+                        }
+                        SearchChrome.dismissKeyboard(searchView != null ? searchView : requireView());
+                    }
+
+                    @Override
+                    public void onClearSearch() {
+                        clearSearchUi();
+                    }
+
+                    @Override
+                    public void onSearchAllGenres() {
+                        // Library has no genre filter.
+                    }
+                }
+        );
+    }
+
+    private void clearSearchUi() {
+        libraryViewModel.setSearchQuery("");
+        if (searchView != null) {
+            searchView.setQuery("", false);
+        }
+        if (searchMenuItem != null && searchMenuItem.isActionViewExpanded()) {
+            searchMenuItem.collapseActionView();
+        } else {
+            searchExpanded = false;
+            refreshSearchPanel();
+        }
+    }
+
+    private void attachDragAndDrop() {
+        ItemTouchHelper.Callback callback = new ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView,
+                                  @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                if (!dragEnabled) {
+                    return false;
+                }
+                int from = viewHolder.getBindingAdapterPosition();
+                int to = target.getBindingAdapterPosition();
+                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION || from == to) {
+                    return false;
+                }
+                Book moved = booksListRecyclerViewAdapter.books.remove(from);
+                booksListRecyclerViewAdapter.books.add(to, moved);
+                booksListRecyclerViewAdapter.notifyItemMoved(from, to);
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            }
+
+            @Override
+            public void clearView(@NonNull RecyclerView recyclerView,
+                                  @NonNull RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+                if (dragEnabled) {
+                    booksListRecyclerViewAdapter.syncBooksFull();
+                    libraryViewModel.reorderFavorites(new ArrayList<>(booksListRecyclerViewAdapter.books));
+                }
+            }
+        };
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(booksListRecyclerView);
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        if (dragEnabled && itemTouchHelper != null) {
+            itemTouchHelper.startDrag(viewHolder);
+        }
+    }
+
     @Override
     public void onDestroy() {
-        // Unregister since the activity is about to be closed.
-        // This is somewhat like [[NSNotificationCenter defaultCenter] removeObserver:name:object:]
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(notificationLibraryBookChange);
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(adFreeReceiver);
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(offlineDownloadReceiver);
         super.onDestroy();
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            booksListRecyclerView.setBackgroundColor(MyColor.getBackgroundColor(mContext));
-            MyImage.setBackgroundImage(mContext, booksListRecyclerView);
-        }
-    };
-
-    private BroadcastReceiver notificationLibraryBookChange = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            booksListRecyclerViewAdapter = new BooksLibraryListRecyclerViewAdapter(mContext, BookLibrary.shared.books(mContext));
-            booksListRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-            booksListRecyclerView.setAdapter(booksListRecyclerViewAdapter);
-            if (searchView != null) {
-                searchView.setQuery("", true);
+            configColor();
+            if (booksListRecyclerViewAdapter != null) {
+                booksListRecyclerViewAdapter.notifyDataSetChanged();
             }
         }
     };
 
-    private void configColor() {
-        SharedPreferences preferences = mContext.getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
-        String backgroundColorName = preferences.getString("background", "default");
+    private BroadcastReceiver adFreeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            AdsHelper.bindBanner(mAdView);
+        }
+    };
 
+    private BroadcastReceiver offlineDownloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (booksListRecyclerViewAdapter != null) {
+                booksListRecyclerViewAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        libraryViewModel.refreshLibrary();
+    }
+
+    private void configColor() {
+        View root = getView();
+        if (root != null) {
+            configColor(root);
+        }
+    }
+
+    private void configColor(@NonNull View root) {
         booksListRecyclerView.setBackgroundColor(MyColor.getBackgroundColor(mContext));
         MyImage.setBackgroundImage(mContext, booksListRecyclerView);
 
-        Window window = ((AppCompatActivity) getActivity()).getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(MyColor.getActionBarColor(mContext));
-
-        View decorView = window.getDecorView();
-        if (backgroundColorName.equals("dark")) {
-            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        textView.setTextColor(MyColor.getTitleTextColor(mContext));
+        if (emptySubtitle != null) {
+            emptySubtitle.setTextColor(MyColor.getDetailTextColor(mContext));
         }
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        actionBar.setBackgroundDrawable(new ColorDrawable(MyColor.getActionBarColor(mContext)));
+        if (actionBar != null) {
+            MyColor.flattenActionBar(actionBar);
+            CharSequence title = actionBar.getTitle();
+            if (title != null) {
+                Spannable text = new SpannableString(title);
+                text.setSpan(new ForegroundColorSpan(MyColor.getTitleTextColor(mContext)), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                actionBar.setTitle(text);
+            }
+        }
+        ScreenChrome.tintHomeChrome((AppCompatActivity) getActivity());
 
-        Spannable text = new SpannableString(actionBar.getTitle());
-        text.setSpan(new ForegroundColorSpan(MyColor.getTitleTextColor(mContext)), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        actionBar.setTitle(text);
-
-        if (menu != null) {
+        SearchPanelBinder.applyTheme(root);
+        if (searchView != null) {
+            SearchChrome.style(searchView, mContext);
+        }
+        if (menu != null && menu.size() > 0) {
             MenuItem searchItem = menu.findItem(R.id.library_menu_action_search);
-            SearchView searchView = (SearchView) searchItem.getActionView();
-
-            int searchHintBtnId = searchView.getContext().getResources()
-                    .getIdentifier("android:id/search_button", null, null);
-            ImageView searchIcon = searchView.findViewById(searchHintBtnId);
-            searchIcon.setImageDrawable(changeDrawableColor(mContext, R.drawable.nav_search, MyColor.getButtonTintColor(mContext)));
-
-            int searchTextID = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-            TextView textView = searchView.findViewById(searchTextID);
-            textView.setTextColor(MyColor.getTitleTextColor(mContext));
-
-            int searchCloseID = searchView.getContext().getResources().getIdentifier("android:id/search_close_btn", null, null);
-            ImageView searchClose = searchView.findViewById(searchCloseID);
-            searchClose.setImageDrawable(changeDrawableColor(mContext, R.drawable.nav_close, MyColor.getButtonTintColor(mContext)));
-
-            menu.getItem(0).setIcon(changeDrawableColor(mContext, R.drawable.nav_search, MyColor.getButtonTintColor(mContext)));
-            menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_sun, MyColor.getButtonTintColor(mContext)));
+            if (searchItem != null) {
+                SearchChrome.tintMenuIcon(searchItem, mContext);
+            }
         }
 
         BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation_main);
-        navigation.setBackground(new ColorDrawable(MyColor.getBottomBarColor(mContext)));
+        MyColor.applyBottomNavigation(mContext, navigation);
+    }
+
+    private void updateEmptyState(int count) {
+        if (emptyLibrary == null) {
+            return;
+        }
+        boolean searching = libraryViewModel.isSearchActive() || searchExpanded && !lastQuery.isEmpty();
+        if (searching) {
+            emptyLibrary.setVisibility(View.INVISIBLE);
+            return;
+        }
+        if (count == 0) {
+            emptyLibrary.setVisibility(View.VISIBLE);
+            BookMotion.revealOnce(emptyLibrary);
+        } else {
+            emptyLibrary.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                Intent intent = new Intent(mContext, MenuActivity.class);
-                this.startActivity(intent);
-                return true;
-            case R.id.home_menu_action_image:
-                Intent i = new Intent(mContext, ImagesActivity.class);
-                startActivityForResult(i, 1);
-                return true;
-            case R.id.library_menu_action_search:
-                return true;
+        if (id == R.id.library_menu_action_search) {
+            return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-
-            configColor();
-
-            booksListRecyclerViewAdapter.notifyDataSetChanged();
-
-            AdRequest adRequestInterstitialAd = new AdRequest.Builder().build();
-
-            InterstitialAd.load(mContext, getResources().getString(R.string.adInterstitialID), adRequestInterstitialAd, new InterstitialAdLoadCallback() {
-                @Override
-                public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                    // The mInterstitialAd reference will be null until
-                    // an ad is loaded.
-                    mInterstitialAd = interstitialAd;
-                    Log.i("Admob", "onAdLoaded");
-                    if (mInterstitialAd != null) {
-                        mInterstitialAd.show(getActivity());
-                    } else {
-                        Log.d("Admob", "The interstitial ad wasn't ready yet.");
-                    }
-                }
-
-                @Override
-                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                    // Handle the error
-                    Log.i("Admob", loadAdError.getMessage());
-                    mInterstitialAd = null;
-                }
-            });
-        }
     }
 
     public static Drawable changeDrawableColor(Context context, int icon, int newColor) {
@@ -249,9 +356,6 @@ public class LibraryFragment extends Fragment {
         return mDrawable;
     }
 
-    SearchView searchView;
-
-    // create an action bar button
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.library_menu, menu);
@@ -259,50 +363,89 @@ public class LibraryFragment extends Fragment {
 
         this.menu = menu;
 
-        MenuItem searchItem = menu.findItem(R.id.library_menu_action_search);
-        searchView = (SearchView) searchItem.getActionView();
+        searchMenuItem = menu.findItem(R.id.library_menu_action_search);
+        SearchChrome.tintMenuIcon(searchMenuItem, mContext);
+        searchView = (SearchView) searchMenuItem.getActionView();
 
-        int searchHintBtnId = searchView.getContext().getResources()
-                .getIdentifier("android:id/search_button", null, null);
-        ImageView searchIcon = searchView.findViewById(searchHintBtnId);
-        searchIcon.setImageDrawable(changeDrawableColor(mContext, R.drawable.nav_search, MyColor.getButtonTintColor(mContext)));
+        String initial = libraryViewModel.getSearchQuery().getValue();
+        if (initial == null) {
+            initial = "";
+        }
 
-        int searchTextID = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-        TextView textView = searchView.findViewById(searchTextID);
-        textView.setTextColor(MyColor.getTitleTextColor(mContext));
-
-        int searchCloseID = searchView.getContext().getResources().getIdentifier("android:id/search_close_btn", null, null);
-        ImageView searchClose = searchView.findViewById(searchCloseID);
-        searchClose.setImageDrawable(changeDrawableColor(mContext, R.drawable.nav_close, MyColor.getButtonTintColor(mContext)));
-
-        menu.getItem(0).setIcon(changeDrawableColor(mContext, R.drawable.nav_search, MyColor.getButtonTintColor(mContext)));
-        menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_sun, MyColor.getButtonTintColor(mContext)));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        SearchChrome.bind(searchView, mContext, initial, new SearchChrome.QueryListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
+            public void onQueryChanged(@NonNull String query) {
+                dragEnabled = query.trim().isEmpty();
+                booksListRecyclerViewAdapter.setDragEnabled(dragEnabled);
+                libraryViewModel.setSearchQuery(query);
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                booksListRecyclerViewAdapter.getFilter().filter(newText);
-                return false;
+            public void onQuerySubmitted(@NonNull String query) {
+                libraryViewModel.setSearchQuery(query);
+            }
+
+            @Override
+            public void onClosed() {
+                dragEnabled = true;
+                booksListRecyclerViewAdapter.setDragEnabled(true);
+                libraryViewModel.setSearchQuery("");
             }
         });
 
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+        searchMenuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
-            public boolean onClose() {
-                booksListRecyclerViewAdapter.getFilter().filter("");
-                return false;
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                searchExpanded = true;
+                refreshSearchPanel();
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                searchExpanded = false;
+                dragEnabled = true;
+                booksListRecyclerViewAdapter.setDragEnabled(true);
+                libraryViewModel.setSearchQuery("");
+                SearchChrome.tintMenuIcon(item, mContext);
+                refreshSearchPanel();
+                updateEmptyState(lastResultCount);
+                return true;
             }
         });
+
+        menu.getItem(0).setIcon(changeDrawableColor(mContext, R.drawable.ic_search, MyColor.getTitleTextColor(mContext)));
+
+        if (!initial.isEmpty()) {
+            searchMenuItem.expandActionView();
+            SearchChrome.restoreQuery(searchView, initial);
+            searchExpanded = true;
+            refreshSearchPanel();
+        }
     }
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        searchView.setQuery("", true);
+        String query = libraryViewModel.getSearchQuery().getValue();
+        if (query == null) {
+            query = "";
+        }
+        if (searchView != null) {
+            SearchChrome.restoreQuery(searchView, query);
+            SearchChrome.style(searchView, mContext);
+        }
+        if (!query.isEmpty() && searchMenuItem != null && !searchMenuItem.isActionViewExpanded()) {
+            searchMenuItem.expandActionView();
+            searchExpanded = true;
+            SearchChrome.restoreQuery(searchView, query);
+        }
+        refreshSearchPanel();
+    }
+
+    public void scrollToTop() {
+        if (booksListRecyclerView != null) {
+            booksListRecyclerView.smoothScrollToPosition(0);
+        }
     }
 }

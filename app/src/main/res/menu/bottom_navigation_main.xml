@@ -11,4 +11,9 @@
         android:icon="@drawable/tab_book_selector"
         android:title="@string/Library" />
 
+    <item
+        android:id="@+id/nav_more"
+        android:icon="@drawable/ic_tab_more"
+        android:title="@string/Menu" />
+
 </menu>

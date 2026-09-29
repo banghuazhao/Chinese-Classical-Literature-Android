@@ -106,7 +106,7 @@ public class StoreHelper {
     public static void goToAmazonMarket(Context context, String packageName) {
         try {
             Uri uri = Uri.parse("amzn://apps/android?p=" + packageName);
-            Intent goToMarket = new Intent();
+            Intent goToMarket = new Intent(Intent.ACTION_VIEW);
             goToMarket.setData(uri);
             context.startActivity(goToMarket);
         } catch (Exception e) {

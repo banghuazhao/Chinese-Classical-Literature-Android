@@ -1,23 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:foreground="?attr/selectableItemBackground"
+    android:orientation="vertical">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:clipChildren="false"
+        android:layoutDirection="ltr">
+
+        <View
+            android:id="@+id/book_pages"
+            android:layout_width="@dimen/cover_page_width"
+            android:layout_height="0dp"
+            android:layout_marginStart="-1dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/bg_book_pages"
+            android:importantForAccessibility="no"
+            app:layout_constraintBottom_toBottomOf="@id/book_cover"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/book_cover"
+            app:layout_constraintTop_toTopOf="@id/book_cover" />
 
         <androidx.cardview.widget.CardView
-            android:layout_width="131.6dp"
-            android:layout_height="210dp"
-            app:cardCornerRadius="8dp">
+            android:id="@+id/book_cover"
+            android:layout_width="@dimen/cover_width"
+            android:layout_height="@dimen/cover_height"
+            app:cardBackgroundColor="@color/paper_deep"
+            app:cardCornerRadius="@dimen/cover_radius"
+            app:cardElevation="@dimen/cover_elevation"
+            app:cardMaxElevation="@dimen/cover_elevation"
+            app:cardPreventCornerOverlap="false"
+            app:cardUseCompatPadding="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -25,52 +50,71 @@
                     android:id="@+id/book_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_launcher_background">
+                    android:contentDescription="@string/book_cover"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/cover_placeholder" />
 
-                </com.google.android.material.imageview.ShapeableImageView>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_spine_fold"
+                    android:importantForAccessibility="no" />
 
-                <com.sackcentury.shinebuttonlib.ShineButton
-                    android:id="@+id/like"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:src="@android:color/darker_gray"
-                    app:allow_random_color="false"
-                    app:btn_color="@android:color/darker_gray"
-                    app:btn_fill_color="@android:color/holo_orange_light"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:siShape="@raw/star" />
+                <View
+                    android:layout_width="@dimen/cover_spine_width"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_spine_highlight"
+                    android:importantForAccessibility="no" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <FrameLayout
+                    android:id="@+id/like_host"
+                    android:layout_width="@dimen/touch_min"
+                    android:layout_height="@dimen/touch_min"
+                    android:layout_gravity="bottom|end"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/save_to_library"
+                    android:focusable="true">
 
-            <TextView
-                android:layout_width="4dp"
-                android:layout_height="match_parent"
-                android:background="#4DFFFFFF"></TextView>
+                    <View
+                        android:layout_width="@dimen/star_scrim_size"
+                        android:layout_height="@dimen/star_scrim_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_star_scrim"
+                        android:importantForAccessibility="no" />
+
+                    <com.sackcentury.shinebuttonlib.ShineButton
+                        android:id="@+id/like"
+                        android:layout_width="@dimen/star_visual"
+                        android:layout_height="@dimen/star_visual"
+                        android:layout_gravity="center"
+                        android:clickable="false"
+                        android:focusable="false"
+                        app:allow_random_color="false"
+                        app:btn_color="#C8C8C8"
+                        app:btn_fill_color="@color/gold_fill"
+                        app:siShape="@raw/star" />
+                </FrameLayout>
+            </FrameLayout>
         </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/book_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:lines="2"
-            android:maxLines="2"
-            android:paddingTop="5dp"
-            android:text="Book Name Book Name Book Name"
-            android:textSize="15dp"></TextView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/shelf_below_cover"
+        android:importantForAccessibility="no" />
 
-        <TextView
-            android:id="@+id/book_author_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Author Name"
-            android:textSize="13dp"></TextView>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    <TextView
+        android:id="@+id/book_name"
+        android:layout_width="@dimen/cover_width"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="start"
+        android:includeFontPadding="false"
+        android:lines="2"
+        android:paddingTop="@dimen/space_8"
+        android:textAppearance="@style/TextAppearance.NovelsHub.BookTitle"
+        android:textColor="@color/ink"
+        tools:text="Pride and Prejudice" />
 
 </LinearLayout>

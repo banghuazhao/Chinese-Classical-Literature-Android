@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="0"
+                android:endColor="@color/pages_light"
+                android:startColor="#E4D6BE" />
+        </shape>
+    </item>
+    <item android:left="3dp">
+        <shape>
+            <solid android:color="@color/pages_edge" />
+        </shape>
+    </item>
+</layer-list>

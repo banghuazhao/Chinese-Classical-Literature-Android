@@ -2,27 +2,23 @@ package com.appsbay.chineseclassicalliteratural.View;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.appsbay.chineseclassicalliteratural.Controller.BookChapterActivity;
 import com.appsbay.chineseclassicalliteratural.Model.Book;
-import com.appsbay.chineseclassicalliteratural.Model.BookLibrary;
 import com.appsbay.chineseclassicalliteratural.R;
-import com.appsbay.chineseclassicalliteratural.Tools.Constants;
+import com.appsbay.chineseclassicalliteratural.data.LibraryRepository;
+import com.appsbay.chineseclassicalliteratural.Tools.BookOpener;
+import com.appsbay.chineseclassicalliteratural.Tools.BookMotion;
+import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
-import com.appsbay.chineseclassicalliteratural.Tools.TinyDB;
 import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.io.IOException;
@@ -33,17 +29,22 @@ public class BooksHorizontalRecyclerViewAdapter extends RecyclerView.Adapter<Boo
 
     Context context;
     ArrayList<Book> books;
-    public Toast toast;
 
     public BooksHorizontalRecyclerViewAdapter(Context context, ArrayList<Book> books) {
         this.context = context;
         this.books = books;
     }
 
+    public void setBooks(ArrayList<Book> books) {
+        this.books = books != null ? new ArrayList<>(books) : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public BooksHorizontalRecyclerViewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false);
+        BookMotion.attachPressEffect(view);
         return new BooksHorizontalRecyclerViewViewHolder(view);
     }
 
@@ -52,81 +53,53 @@ public class BooksHorizontalRecyclerViewAdapter extends RecyclerView.Adapter<Boo
         Book book = books.get(position);
         holder.bookName.setText(book.getName());
         holder.bookName.setTextColor(MyColor.getTitleTextColor(context));
-        holder.bookAuthor.setText(book.getAuthor());
-        holder.bookAuthor.setTextColor(MyColor.getDetailTextColor(context));
+        holder.bookImage.setContentDescription(book.getName());
 
         try {
-            // get input stream
-            InputStream ims = context.getAssets().open("covers/" + book.getImageName() + ".png");
-            // load image as Drawable
+            InputStream ims = context.getAssets().open("covers/" + book.getBookCover() + ".png");
             Drawable d = Drawable.createFromStream(ims, null);
-            // set image to ImageView
             holder.bookImage.setImageDrawable(d);
             ims.close();
         } catch (IOException ex) {
-            return;
+            holder.bookImage.setImageResource(R.drawable.cover_placeholder);
         }
 
-        holder.bookImage.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent companyInfoIntent = new Intent(context, BookChapterActivity.class);
-                companyInfoIntent.putExtra("book", book);
-                context.startActivity(companyInfoIntent);
+                BookOpener.open(context, book);
             }
         });
 
-        if(BookLibrary.shared.have(holder.itemView.getContext(), book)) {
-            holder.shineButton.setChecked(true);
-        } else {
-            holder.shineButton.setChecked(false);
-        }
+        holder.itemView.setOnLongClickListener(null);
 
-        final View shineButtonParent = (View) holder.shineButton.getParent();  // button: the view you want to enlarge hit area
-        shineButtonParent.post( new Runnable() {
-            public void run() {
-                final Rect rect = new Rect();
-                holder.shineButton.getHitRect(rect);
-                rect.top -= 16;
-                rect.bottom += 16;    // increase top hit area
-                rect.left -= 16;   // increase left hit area
-                rect.right += 16;  // increase right hit area
-                shineButtonParent.setTouchDelegate( new TouchDelegate( rect , holder.shineButton));
-            }
-        });
+        bindLibraryStar(holder, book);
+    }
 
-        holder.shineButton.setOnClickListener(new View.OnClickListener() {
+    private void bindLibraryStar(BooksHorizontalRecyclerViewViewHolder holder, Book book) {
+        boolean saved = LibraryRepository.getInstance(holder.itemView.getContext()).isFavorite(book);
+        holder.shineButton.setClickable(false);
+        holder.shineButton.setFocusable(false);
+        holder.shineButton.setChecked(saved);
+        holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
+                saved ? R.string.remove_from_library : R.string.save_to_library));
+        holder.likeHost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (holder.shineButton.isChecked()) {
-                    BookLibrary.shared.save(holder.itemView.getContext(), book);
+                boolean next = !holder.shineButton.isChecked();
+                holder.shineButton.setChecked(next, true);
+                holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
+                        next ? R.string.remove_from_library : R.string.save_to_library));
+                LibraryRepository libraryRepository = LibraryRepository.getInstance(holder.itemView.getContext());
+                if (next) {
+                    libraryRepository.addFavorite(book);
 
                     String addedString = holder.itemView.getContext().getResources().getString(R.string.Library_added);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(holder.itemView.getContext(),
-                            addedString + ": " + book.getName(),Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    Intent intent1 = new Intent(Constants.NotificationHomeListBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent1);
-                    Intent intent2 = new Intent(Constants.NotificationLibraryBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent2);
+                    DialogChrome.snack(holder.itemView, addedString + ": " + book.getName());
                 } else {
-                    BookLibrary.shared.remove(holder.itemView.getContext(), book);
+                    libraryRepository.removeFavorite(book);
                     String removedString = holder.itemView.getContext().getResources().getString(R.string.Library_removed);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(holder.itemView.getContext(),
-                             removedString + ": " + book.getName(),Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    Intent intent1 = new Intent(Constants.NotificationHomeListBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent1);
-                    Intent intent2 = new Intent(Constants.NotificationLibraryBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent2);
+                    DialogChrome.snack(holder.itemView, removedString + ": " + book.getName());
                 }
             }
         });
@@ -140,17 +113,16 @@ public class BooksHorizontalRecyclerViewAdapter extends RecyclerView.Adapter<Boo
     public class BooksHorizontalRecyclerViewViewHolder extends RecyclerView.ViewHolder {
 
         TextView bookName;
-        TextView bookAuthor;
         ImageView bookImage;
         ShineButton shineButton;
-
+        View likeHost;
 
         public BooksHorizontalRecyclerViewViewHolder(@NonNull View itemView) {
             super(itemView);
             bookName = itemView.findViewById(R.id.book_name);
-            bookAuthor = itemView.findViewById(R.id.book_author_name);
             bookImage = itemView.findViewById(R.id.book_image);
             shineButton = itemView.findViewById(R.id.like);
+            likeHost = itemView.findViewById(R.id.like_host);
         }
     }
 

@@ -1,21 +1,71 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep line numbers for crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Gson / models
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep class com.appsbay.novelshub.Model.** { *; }
+-keep class com.appsbay.novelshub.data.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Parcelable CREATORs
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Enums used by Parcelable Book
+-keepclassmembers enum * {
+  public static **[] values();
+  public static ** valueOf(java.lang.String);
+}
+
+# Play Billing
+-keep class com.android.vending.billing.** { *; }
+-keep class com.android.billingclient.** { *; }
+
+# Google Mobile Ads / mediation
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.mediation.** { *; }
+-dontwarn com.google.android.gms.ads.**
+
+# OkHttp / Okio
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
+# Picasso
+-dontwarn com.squareup.okhttp.**
+-keep class com.squareup.picasso.** { *; }
+
+# ShineButton
+-keep class com.sackcentury.shinebuttonlib.** { *; }
+
+# Kotlin
+-dontwarn kotlin.**
+-keep class kotlin.Metadata { *; }
+-keepclassmembers class **$WhenMappings {
+  <fields>;
+}
+-keepclassmembers class kotlin.Metadata {
+  public <methods>;
+}
+
+# ViewModels referenced by class name
+-keep class * extends androidx.lifecycle.ViewModel {
+  <init>(android.app.Application);
+  <init>();
+}
+
+# Firebase
+-dontwarn com.google.firebase.**
+
+# Room
+# Room loads the generated <Database>_Impl class reflectively by name, so R8 must
+# not remove it. Reached here through androidx.work, which play-services-ads pulls
+# in transitively: without this, WorkManagerInitializer crashes the app on launch.
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-dontwarn androidx.room.paging.**

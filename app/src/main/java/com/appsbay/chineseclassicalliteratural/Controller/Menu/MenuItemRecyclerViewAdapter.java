@@ -1,11 +1,8 @@
 package com.appsbay.chineseclassicalliteratural.Controller.Menu;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +12,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-
+import com.appsbay.chineseclassicalliteratural.Controller.ImagesActivity;
 import com.appsbay.chineseclassicalliteratural.Controller.Menu.MoreApps.MoreAppsActivity;
+import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.R;
+import com.appsbay.chineseclassicalliteratural.Tools.BillingManager;
+import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.HelperFunctions;
+import com.appsbay.chineseclassicalliteratural.Tools.LocaleHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
+import com.appsbay.chineseclassicalliteratural.Tools.RewardedAdHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.StoreHelper;
 
 import java.util.ArrayList;
@@ -49,47 +51,106 @@ public class MenuItemRecyclerViewAdapter extends RecyclerView.Adapter<MenuItemRe
         holder.itemText.setText(menuItem.getItemName());
         holder.itemText.setTextColor(MyColor.getTitleTextColor(context));
         holder.menuIcon.setImageDrawable(menuItem.getIcon());
-        holder.rightArrow.setImageDrawable(MyImage.changeDrawableColor(context, R.drawable.icon_right_arrow, MyColor.getButtonTintColor(context)));
+        holder.rightArrow.setImageDrawable(MyImage.changeDrawableColor(
+                context, R.drawable.icon_right_arrow, MyColor.getButtonTintColor(context)));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (position == 0) {
+        holder.itemView.setOnClickListener(v -> {
+            switch (menuItem.getAction()) {
+                case MenuItem.ACTION_FEEDBACK: {
                     Intent email = new Intent(Intent.ACTION_SEND);
                     email.putExtra(Intent.EXTRA_EMAIL, new String[]{"appsbayarea@gmail.com"});
-                    email.putExtra(Intent.EXTRA_SUBJECT, HelperFunctions.getApplicationName(context) + " - " + context.getResources().getString(R.string.Feedback));
+                    email.putExtra(Intent.EXTRA_SUBJECT,
+                            HelperFunctions.getApplicationName(context) + " - "
+                                    + context.getResources().getString(R.string.Feedback));
                     email.putExtra(Intent.EXTRA_TEXT, "");
-
                     email.setType("message/rfc822");
-
                     context.startActivity(Intent.createChooser(email, "Choose an Email client:"));
+                    break;
                 }
-
-                if (position == 1) {
+                case MenuItem.ACTION_RATE:
                     StoreHelper.goToGoogleMarket(context, context.getPackageName());
-                }
-
-                if (position == 2) {
+                    break;
+                case MenuItem.ACTION_SHARE:
                     try {
                         Intent shareIntent = new Intent(Intent.ACTION_SEND);
                         shareIntent.setType("text/plain");
-                        shareIntent.putExtra(Intent.EXTRA_SUBJECT, HelperFunctions.getApplicationName(context));
-                        String shareMessage = "https://play.google.com/store/apps/details?id=" + ((Activity) context).getPackageName() + "\n";
+                        shareIntent.putExtra(Intent.EXTRA_SUBJECT,
+                                HelperFunctions.getApplicationName(context));
+                        String shareMessage = "https://play.google.com/store/apps/details?id="
+                                + context.getPackageName() + "\n";
                         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
                         context.startActivity(Intent.createChooser(shareIntent, "choose one"));
-                    } catch (Exception e) {
-                        //e.toString();
+                    } catch (Exception ignored) {
                     }
-                }
-
-                if (position == 3) {
-                    Intent intent = new Intent(context, MoreAppsActivity.class);
-                    context.startActivity(intent);
-                }
-
+                    break;
+                case MenuItem.ACTION_REMOVE_ADS:
+                    if (context instanceof Activity) {
+                        BillingManager.get(context).launchRemoveAdsPurchase((Activity) context);
+                    }
+                    break;
+                case MenuItem.ACTION_WATCH_AD_FREE:
+                    if (context instanceof Activity) {
+                        RewardedAdHelper.get(context)
+                                .showForTwentyFourHourAdFree((Activity) context);
+                    }
+                    break;
+                case MenuItem.ACTION_RESTORE:
+                    BillingManager.get(context).restorePurchases();
+                    break;
+                case MenuItem.ACTION_MORE_APPS:
+                    context.startActivity(new Intent(context, MoreAppsActivity.class));
+                    break;
+                case MenuItem.ACTION_BACKGROUND:
+                    context.startActivity(new Intent(context, ImagesActivity.class));
+                    break;
+                case MenuItem.ACTION_LANGUAGE:
+                    showLanguagePicker();
+                    break;
+                case MenuItem.ACTION_SCRIPT:
+                    showScriptPicker();
+                    break;
+                default:
+                    break;
             }
         });
+    }
+
+    /**
+     * Applies to the app's own strings only - book text ships in assets and
+     * stays in its original language.
+     */
+    private void showLanguagePicker() {
+        String[] tags = LocaleHelper.tags();
+        int[] checked = {LocaleHelper.getSelectedIndex()};
+        androidx.appcompat.app.AlertDialog dialog = DialogChrome.alert(context)
+                .setTitle(R.string.Language)
+                .setSingleChoiceItems(LocaleHelper.labels(context), checked[0],
+                        (d, which) -> checked[0] = which)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok,
+                        (d, which) -> LocaleHelper.apply(tags[checked[0]]))
+                .create();
+        dialog.setOnShowListener(d -> DialogChrome.styleAlertDialog(dialog, context));
+        dialog.show();
+    }
+
+    private void showScriptPicker() {
+        String[] scripts = {
+                context.getString(R.string.book_script_simplified),
+                context.getString(R.string.book_script_traditional)
+        };
+        int[] checked = {BookStore.shared.usesTraditional(context) ? 1 : 0};
+        androidx.appcompat.app.AlertDialog dialog = DialogChrome.alert(context)
+                .setTitle(R.string.book_script)
+                .setSingleChoiceItems(scripts, checked[0], (d, which) -> checked[0] = which)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    BookStore.shared.setTraditional(context, checked[0] == 1);
+                    if (context instanceof Activity) ((Activity) context).recreate();
+                })
+                .create();
+        dialog.setOnShowListener(d -> DialogChrome.styleAlertDialog(dialog, context));
+        dialog.show();
     }
 
     @Override
@@ -108,8 +169,6 @@ public class MenuItemRecyclerViewAdapter extends RecyclerView.Adapter<MenuItemRe
             itemText = itemView.findViewById(R.id.row_menu_textView);
             menuIcon = itemView.findViewById(R.id.row_menu_icon);
             rightArrow = itemView.findViewById(R.id.row_menu_arrow);
-            menuIcon.setColorFilter(Color.argb(255, 80,80,80));
         }
     }
-
 }

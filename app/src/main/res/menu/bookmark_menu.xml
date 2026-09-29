@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/nav_book_chapter_bookmark"
-        android:icon="@drawable/nav_bookmark"
-        app:showAsAction="always"
-        android:title="" />
+        android:id="@+id/nav_book_chapter_info"
+        android:icon="@drawable/nav_info"
+        android:title="@string/About_this_book"
+        app:showAsAction="always" />
 </menu>

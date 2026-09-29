@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tag_inset_padding_top" type="id" />
+    <item name="tag_inset_padding_bottom" type="id" />
+    <item name="tag_book_motion_press" type="id" />
+    <item name="tag_book_motion_revealed" type="id" />
+</resources>

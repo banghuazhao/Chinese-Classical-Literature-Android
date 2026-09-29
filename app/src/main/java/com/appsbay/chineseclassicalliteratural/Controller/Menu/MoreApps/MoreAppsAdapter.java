@@ -11,35 +11,28 @@ import com.appsbay.chineseclassicalliteratural.R;
 
 import java.util.List;
 
-public class MoreAppsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MoreAppsAdapter extends RecyclerView.Adapter<MoreAppsViewHolder> {
 
-    private List<MoreApp> models;
+    private final List<MoreApp> models;
 
-    public MoreAppsAdapter(List<MoreApp> mData) {
-        models = mData;
+    public MoreAppsAdapter(List<MoreApp> models) {
+        this.models = models;
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.row_more_apps,
-                parent,
-                false);
-        MoreAppsViewHolder holder = new MoreAppsViewHolder(view);
-        return holder;
+    public MoreAppsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_more_apps, parent, false);
+        return new MoreAppsViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        MoreApp moreApp = (MoreApp) models.get(position);
-        MoreAppsViewHolder moreAppsViewHolder = (MoreAppsViewHolder) holder;
-        moreAppsViewHolder.bind(moreApp);
+    public void onBindViewHolder(@NonNull MoreAppsViewHolder holder, int position) {
+        holder.bind(models.get(position));
     }
 
     @Override
     public int getItemCount() {
         return models.size();
     }
-
 }

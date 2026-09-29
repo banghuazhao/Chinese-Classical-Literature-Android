@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/page_gutter"
+    android:paddingTop="@dimen/space_20"
+    android:paddingEnd="@dimen/page_gutter"
+    android:paddingBottom="@dimen/space_16">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/book_detail_cover_card"
+            android:layout_width="96dp"
+            android:layout_height="144dp"
+            app:cardBackgroundColor="@color/paper_deep"
+            app:cardCornerRadius="@dimen/cover_radius"
+            app:cardElevation="6dp"
+            app:cardPreventCornerOverlap="false"
+            app:cardUseCompatPadding="false">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/book_detail_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/book_cover"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/cover_placeholder" />
+
+                <View
+                    android:layout_width="7dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_spine_highlight"
+                    android:importantForAccessibility="no" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_20"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/book_detail_eyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/classic_edition"
+                android:textAppearance="@style/TextAppearance.NovelsHub.SectionLabel" />
+
+            <TextView
+                android:id="@+id/book_detail_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:fontFamily="@font/cormorant_semibold"
+                android:includeFontPadding="false"
+                android:lineSpacingMultiplier="1.02"
+                android:textColor="@color/ink"
+                android:textSize="26sp"
+                app:fontFamily="@font/cormorant_semibold"
+                tools:text="Pride and Prejudice" />
+
+            <TextView
+                android:id="@+id/book_detail_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/bg_row_ripple"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:paddingEnd="@dimen/space_8"
+                android:textColor="@color/gold"
+                android:textSize="14sp"
+                tools:text="Jane Austen" />
+
+            <TextView
+                android:id="@+id/book_detail_progress_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/ink_muted"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:text="42% · Ch 12/61"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/book_detail_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_marginTop="@dimen/space_4"
+                android:max="100"
+                android:visibility="gone"
+                tools:progress="42"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/book_detail_continue"
+                style="@style/Widget.NovelsHub.ContinueButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_12"
+                android:text="@string/continue_reading"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/book_detail_toc_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_24"
+        android:text="@string/Contents"
+        android:textAppearance="@style/TextAppearance.NovelsHub.SectionLabel"
+        android:textColor="@color/gold" />
+
+    <View
+        android:id="@+id/book_detail_toc_rule"
+        android:layout_width="40dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/space_8"
+        android:background="@color/gold_soft"
+        android:importantForAccessibility="no" />
+
+</LinearLayout>

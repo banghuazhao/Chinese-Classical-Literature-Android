@@ -3,118 +3,64 @@ package com.appsbay.chineseclassicalliteratural.Controller;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.GridView;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.R;
+import com.appsbay.chineseclassicalliteratural.Tools.AdsHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
-import com.appsbay.chineseclassicalliteratural.View.ImagesGrideViewAdapter;
-import com.google.android.gms.ads.AdRequest;
+import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
+import com.appsbay.chineseclassicalliteratural.View.BackgroundThemeAdapter;
 import com.google.android.gms.ads.AdView;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ImagesActivity extends AppCompatActivity {
-    ArrayList<String> images = new ArrayList<String>() {{
-        add("default");
-        add("white");
-        add("dark");
-        add("green");
-        add("bg");
-        add("bg1");
-        add("bg2");
-        add("bg3");
-        add("bg4");
-        add("bg5");
-    }};
 
-    GridView gridView;
-
-    Context mContext;
-
-    private AdView mAdView;
+    private static final List<String> THEMES = Arrays.asList(
+            "system", "default", "white", "dark", "green",
+            "bg", "bg1", "bg2", "bg3", "bg4", "bg5"
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_images);
+
+        View root = findViewById(R.id.images_root);
+        AdView adView = findViewById(R.id.adViewBanner);
+        View adContainer = findViewById(R.id.ad_container);
+        RecyclerView grid = findViewById(R.id.images_grid);
+
+        ScreenChrome.setup(this, root, adContainer);
         setTitle(R.string.Background);
 
-        mAdView = findViewById(R.id.adViewBanner);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        AdsHelper.bindBanner(adView);
 
-        mContext = this;
+        SharedPreferences preferences = getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
+        String selected = preferences.getString("background", "system");
 
-        ImagesGrideViewAdapter adapter = new ImagesGrideViewAdapter(this, images);
+        grid.setLayoutManager(new GridLayoutManager(this, 3));
+        grid.setHasFixedSize(true);
+        grid.setAdapter(new BackgroundThemeAdapter(THEMES, selected, this::onThemeSelected));
 
-        gridView = findViewById(R.id.images_grid_view);
-
-        gridView.setAdapter(adapter);
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences preferences = mContext.getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("background", images.get(position));
-                editor.apply();
-                Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
-
-                Intent intent1 = new Intent("NotificationBackgroundChange");
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent1);
-
-                finish();
-            }
-        });
-
-        configColor();
+        root.setBackgroundColor(MyColor.getBackgroundColor(this));
+        MyImage.setBackgroundImage(this, root);
+        grid.setBackgroundColor(android.graphics.Color.TRANSPARENT);
     }
 
-    private void configColor() {
-        SharedPreferences preferences = this.getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
-        String backgroundColorName = preferences.getString("background", "default");
-
-        gridView.setBackgroundColor(MyColor.getBackgroundColor(this));
-        MyImage.setBackgroundImage(this, gridView);
-
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(MyColor.getActionBarColor(this));
-
-        View decorView = window.getDecorView();
-        if (backgroundColorName.equals("dark")) {
-            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        } else {
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setBackgroundDrawable(new ColorDrawable(MyColor.getActionBarColor(this)));
-
-        Spannable text = new SpannableString(actionBar.getTitle());
-        text.setSpan(new ForegroundColorSpan(MyColor.getTitleTextColor(this)), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        actionBar.setTitle(text);
-
-        final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_material);
-        upArrow.setColorFilter(new PorterDuffColorFilter(MyColor.getButtonTintColor(this), PorterDuff.Mode.SRC_ATOP));
-        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+    private void onThemeSelected(String themeId) {
+        SharedPreferences preferences = getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
+        preferences.edit().putString("background", themeId).apply();
+        setResult(RESULT_OK, new Intent());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent("NotificationBackgroundChange"));
+        finish();
     }
 }

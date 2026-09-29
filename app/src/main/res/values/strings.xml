@@ -1,57 +1,161 @@
 <resources>
-    <string name="app_name">中华古籍</string>
+    <string name="app_name" translatable="false">中华古籍</string>
     <string name="Feedback">Feedback</string>
-    <string name="Menu">Menu</string>
+    <string name="Menu">More</string>
     <string name="Rate">Rate this App</string>
     <string name="Share">Share this App</string>
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
     <string name="Enjoy">Enjoying</string>
-    <string name="choose_language">请选择书籍的语言</string>
-    <string name="Background">Background</string>
-    <string name="More">More</string>
-    <string name="Default">Default</string>
-    <string name="DarkMode">Dark Mode</string>
+    <string name="rate_dialog_title">Enjoying %1$s?</string>
+    <string name="rate_dialog_message">If Chinese Classical Literature is helping you enjoy the classics, a quick rating on Play Store means a lot.</string>
+    <string name="rate_dialog_not_now">Not now</string>
+    <string name="rate_dialog_rate">Rate</string>
+    <string name="reader_options">Reading options</string>
 
     <string name="MoreApps">More Apps</string>
-    <string name="FinanceGo">Finance Go</string>
-    <string name="FinanceGoDescription">Financial Reports, Stock Market Analysis and Stocks Investing</string>
-    <string name="FinancialRatiosGo">Financial Ratios Go</string>
-    <string name="FinancialRatiosGoDescription">Finance, Stocks and Investing</string>
-    <string name="SudokuLover">Sudoku Lover</string>
-    <string name="SudokuPuzzles">Sdoku Puzzles</string>
-    <string name="WePlayPiano">We Play Piano</string>
-    <string name="PianoKeyboard">Piano Keyboard</string>
-    <string name="SavingAmbulanceSlidingBlock">Saving Ambulance!Sliding Block</string>
-    <string name="SlidingPuzzleWithCars">Sliding Puzzle With Cars</string>
-    <string name="RelaxingUp">Relaxing Up</string>
-    <string name="MeditationandHealing">Meditation and Healing</string>
-    <string name="MintTranslate">Mint Translate</string>
-    <string name="TextTranslator">Text Translator</string>
-    <string name="InstantFace">Instant Face</string>
-    <string name="AvatarMaker">Avatar Maker</string>
-    <string name="WorldWeatherLiveAllCities">World Weather Live: All Cities</string>
-    <string name="Weatherradarweatherforecast">Weather radar,weather forecast</string>
-    <string name="NovelsHub">NovelsHub</string>
-    <string name="FictioneBooksLibrary">Fiction eBooks Library</string>
-    <string name="ChineseClassicalLiteratural">中华经典古籍</string>
-    <string name="ChineseClassicalLiteraturalDescription">古代典籍小说阅读器电子书全集</string>
-    <string name="FourGreateChineseLiteratural">四大名著合集</string>
-    <string name="FourGreateChineseLiteraturalDescription">经典四大名著阅读器电子书全集</string>
-    <string name="MinguoLiteratural">民国文学</string>
-    <string name="MinguoLiteraturalDescription">阅读经典人气小说原著</string>
-    <string name="Bookmark_added_at">Bookmark added at</string>
-    <string name="Add_book_markat">Add bookmark at</string>
-    <string name="Goto_Bookmark_at">Goto Bookmark at</string>
-    <string name="Library_added">Library added</string>
-    <string name="Library_removed">Library removed</string>
+    <string name="FinanceGo" translatable="false">Finance Go</string>
+    <string name="FinanceGoDescription" translatable="false">Financial Reports, Stock Market Analysis and Stocks Investing</string>
+    <string name="FinancialRatiosGo" translatable="false">Financial Ratios Go</string>
+    <string name="FinancialRatiosGoDescription" translatable="false">Finance, Stocks and Investing</string>
+    <string name="NovelsHub" translatable="false">NovelsHub</string>
+    <string name="FictioneBooksLibrary" translatable="false">Fiction eBooks Library</string>
+    <string name="MetronomeGo" translatable="false">Metronome Go</string>
+    <string name="tempo" translatable="false">tempo,bpm-counter</string>
+    <string name="SimpleCalculator" translatable="false">Simple Calculator:Calculator +</string>
+    <string name="MathCalculator" translatable="false">Math Calculator</string>
+    <string name="SudokuLover" translatable="false">Sudoku Lover</string>
+    <string name="SudokuPuzzles" translatable="false">Sdoku Puzzles</string>
+    <string name="WePlayPiano" translatable="false">We Play Piano</string>
+    <string name="PianoKeyboard" translatable="false">Piano Keyboard</string>
+    <string name="SavingAmbulanceSlidingBlock" translatable="false">Saving Ambulance!Sliding Block</string>
+    <string name="SlidingPuzzleWithCars" translatable="false">Sliding Puzzle With Cars</string>
+    <string name="RelaxingUp" translatable="false">Relaxing Up</string>
+    <string name="MeditationandHealing" translatable="false">Meditation and Healing</string>
+    <string name="ClassicMemoryGame" translatable="false">Memory Match Pairs: Twinvale</string>
+    <string name="ClassicMemoryGameDescription" translatable="false">Match cards, train your memory</string>
+    <string name="Background">Background</string>
+    <string name="BackgroundDefault">Default</string>
+    <string name="BackgroundDarkMode">Dark Mode</string>
+    <string name="MintTranslate" translatable="false">Mint Translate</string>
+    <string name="TextTranslator" translatable="false">Text Translator</string>
+    <string name="InstantFace" translatable="false">Instant Face</string>
+    <string name="AvatarMaker" translatable="false">Avatar Maker</string>
+    <string name="WorldWeatherLiveAllCities" translatable="false">World Weather Live: All Cities</string>
+    <string name="Weatherradarweatherforecast" translatable="false">Weather radar,weather forecast</string>
+    <string name="Library_added">Added to favorites</string>
+    <string name="Library_removed">Removed from favorites</string>
     <string name="Home">Home</string>
-    <string name="Library">Library</string>
-    <string name="No_books_in_the_library">No books in the library</string>
+    <string name="Library">Favorite</string>
+    <string name="My_Library">Favorite</string>
+    <string name="No_books_in_the_library">No books in favorites</string>
     <string name="Tap">Tap</string>
-    <string name="to_add_a_book_in_the_library">to add a book in the library</string>
+    <string name="to_add_a_book_in_the_library">to add a book to favorites</string>
     <string name="Stop_Reading">Stop Reading</string>
     <string name="Begin_Reading">Begin Reading</string>
     <string name="ShareArticle">Share</string>
     <string name="Font_Size">Font Size</string>
+    <string name="NoBookInLibrary">Your favorites are empty</string>
+    <string name="NoBookInLibrarySubtitle">Tap the star on any book to save it here</string>
+    <string name="reorder_favorites">Reorder favorites</string>
+    <string name="See_all">See all</string>
+    <string name="see_all_for_category">See all in %1$s</string>
+    <string name="see_matches">See matches</string>
+    <string name="see_matches_for_category">See matches in %1$s</string>
+    <string name="searching_for_query">Searching “%1$s”</string>
+    <string name="search_books">Search books</string>
+    <string name="search_books_hint">Title or author</string>
+    <string name="search_suggestions_label">Recent &amp; popular authors</string>
+    <string name="search_in_genre">in %1$s</string>
+    <string name="search_no_results_title">No books for “%1$s”</string>
+    <string name="search_no_results_subtitle">Try another title or author</string>
+    <string name="search_no_results_subtitle_genre">Nothing in this category. Try another category or clear search</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_all_genres">Search all categories</string>
+    <string name="search_match_title">Matched in title</string>
+    <string name="search_match_author">Matched in author</string>
+    <string name="search_match_introduction">Matched in description</string>
+    <string name="search_match_author_bio">Matched in author bio</string>
+    <string name="genre_all">All</string>
+    <string name="genre_romance">Romance</string>
+    <string name="genre_realistic">Realistic</string>
+    <string name="genre_fantasy">Fantasy</string>
+    <string name="genre_gothic">Gothic</string>
+    <string name="genre_crime">Crime</string>
+    <string name="genre_filter">Filter by category</string>
+    <string name="toggle_home_layout">Toggle shelves or list</string>
+    <string name="change_background">Change background</string>
+    <string name="remove_from_library">Remove from favorites</string>
+    <string name="Contents">Contents</string>
+    <string name="Volumes">Volumes</string>
+    <string name="About_this_book">About this book</string>
+    <string name="About_the_author">About the author</string>
+    <string name="about_author_named">About %1$s</string>
+    <string name="more">more</string>
+    <string name="less">less</string>
+    <string name="book_cover">Book cover</string>
+    <string name="close">Close</string>
+    <string name="view_book_cover">View book cover</string>
+    <string name="save_to_library">Save to favorites</string>
+    <string name="chapter_bookmark">Chapter bookmark</string>
+    <string name="downloading_book">Downloading this book…</string>
+    <string name="downloading_book_hint">This happens only the first time you open it. It is then saved for offline reading.</string>
+    <string name="error_try_again">Try again</string>
+    <string name="book_offline_title">This book isn’t downloaded yet</string>
+    <string name="book_offline_message">Chinese Classical Literature needs to download it once before you can read it offline. Connect to the internet and try again.</string>
+    <string name="book_download_failed_title">Download didn’t finish</string>
+    <string name="book_download_failed_message">We couldn’t finish downloading this book. Check your connection and try again.</string>
+    <string name="book_unavailable_title">This book can’t be opened</string>
+    <string name="book_unavailable_message">Something is wrong with this title. Please try another book — we’re looking into it.</string>
+    <string name="continue_reading">Continue reading</string>
+    <string name="resume_reading">Resume</string>
+    <string name="classic_edition">Classic edition</string>
+    <string name="reading_progress">Reading progress</string>
+    <string name="chapter_progress">Chapter %1$d of %2$d</string>
+    <string name="chapter_progress_with_percent">%1$d%% of chapter · Chapter %2$d of %3$d</string>
+    <string name="chapter_percent_of_chapter">%1$d%% of chapter</string>
+    <string name="previous_chapter_button">‹  Previous</string>
+    <string name="next_chapter_button">Next  ›</string>
+    <string name="reading_progress_label">%1$d%% · Ch %2$d/%3$d</string>
+    <string name="reading_chapter_only">Chapter %1$d</string>
+    <string name="BackgroundSystem">System</string>
+    <string name="remove_ads">Remove ads</string>
+    <string name="remove_ads_price">Remove ads (%1$s)</string>
+    <string name="ad_free_active">Ad-free (purchased)</string>
+    <string name="watch_ad_for_24h">Watch ad for 24h ad-free</string>
+    <string name="temp_ad_free_active">Ad-free (24h active)</string>
+    <string name="temp_ad_free_already_active">You already have 24h ad-free active</string>
+    <string name="temp_ad_free_granted">Ads hidden for 24 hours. Enjoy reading.</string>
+    <string name="rewarded_ad_loading">Loading rewarded ad…</string>
+    <string name="rewarded_ad_unavailable">Rewarded ad unavailable right now. Try again later.</string>
+    <string name="restore_purchases">Restore purchases</string>
+    <string name="purchase_restored">Purchase restored</string>
+    <string name="purchase_failed">Purchase failed. Try again later.</string>
+    <string name="purchase_unavailable">Billing is unavailable right now. Try again later.</string>
+    <string name="purchase_nothing_to_restore">No previous purchase found.</string>
+    <string name="previous_chapter">Previous chapter</string>
+    <string name="next_chapter">Next chapter</string>
+    <string name="previous_chapter_symbol" translatable="false">‹</string>
+    <string name="next_chapter_symbol" translatable="false">›</string>
+
+    <plurals name="search_result_count">
+        <item quantity="one">%d book</item>
+        <item quantity="other">%d books</item>
+    </plurals>
+
+
+    <string name="genre_romance_full">Romance &amp; Historical Fiction</string>
+    <string name="genre_realistic_full">Realistic &amp; Social Fiction</string>
+    <string name="genre_fantasy_full">Fantasy &amp; Adventure Fiction</string>
+    <string name="genre_gothic_full">Gothic &amp; Psychological Fiction</string>
+    <string name="genre_crime_full">Crime &amp; Detective Fiction</string>
+    <string name="Language">Language</string>
+    <string name="language_system_default">System default</string>
+    <string name="genre_classics">Four Books and Five Classics</string>
+    <string name="genre_philosophy">Schools of Thought</string>
+    <string name="genre_fiction">Classic Fiction</string>
+    <string name="genre_other">Other Works</string>
+    <string name="book_script">Book script</string>
+    <string name="book_script_simplified">Simplified Chinese</string>
+    <string name="book_script_traditional">Traditional Chinese</string>
 </resources>

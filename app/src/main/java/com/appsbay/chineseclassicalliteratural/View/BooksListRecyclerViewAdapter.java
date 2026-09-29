@@ -1,190 +1,198 @@
 package com.appsbay.chineseclassicalliteratural.View;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.appsbay.chineseclassicalliteratural.Controller.BookChapterActivity;
 import com.appsbay.chineseclassicalliteratural.Model.Book;
-import com.appsbay.chineseclassicalliteratural.Model.BookLibrary;
+import com.appsbay.chineseclassicalliteratural.Model.LiteraryCopy;
 import com.appsbay.chineseclassicalliteratural.R;
-import com.appsbay.chineseclassicalliteratural.Tools.Constants;
+import com.appsbay.chineseclassicalliteratural.data.LibraryRepository;
+import com.appsbay.chineseclassicalliteratural.Tools.BookDetailHeader;
+import com.appsbay.chineseclassicalliteratural.Tools.BookMotion;
+import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
+import com.appsbay.chineseclassicalliteratural.Tools.BookOpener;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
+import com.appsbay.chineseclassicalliteratural.Tools.ReadingProgressHelper;
+import com.appsbay.chineseclassicalliteratural.Tools.SearchHighlight;
 import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class BooksListRecyclerViewAdapter extends RecyclerView.Adapter<BooksListRecyclerViewAdapter.BooksListRecyclerViewAdapterViewHolder> implements Filterable {
+public class BooksListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+
+    public interface OnFilterPublishedListener {
+        void onFilterPublished(int count);
+    }
+
+    private static final int TYPE_COLLECTION_HEADER = 0;
+    private static final int TYPE_BOOK = 1;
 
     Context context;
     public ArrayList<Book> books;
     private List<Book> filteredBooks;
+    private final Book collectionBook;
     String searchString;
-    public Toast toast;
+    private OnFilterPublishedListener filterPublishedListener;
 
     public BooksListRecyclerViewAdapter(Context context, ArrayList<Book> books) {
+        this(context, books, null);
+    }
+
+    public BooksListRecyclerViewAdapter(Context context, ArrayList<Book> books, Book collectionBook) {
         this.context = context;
-        this.books = books;
-        filteredBooks = new ArrayList<>(books);
+        this.books = books != null ? books : new ArrayList<Book>();
+        this.collectionBook = collectionBook;
+        filteredBooks = new ArrayList<>(this.books);
+    }
+
+    public void setOnFilterPublishedListener(OnFilterPublishedListener listener) {
+        this.filterPublishedListener = listener;
+    }
+
+    private int headerCount() {
+        return showingHeader() ? 1 : 0;
+    }
+
+    private boolean showingHeader() {
+        return collectionBook != null && (searchString == null || searchString.isEmpty());
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (showingHeader() && position == 0) {
+            return TYPE_COLLECTION_HEADER;
+        }
+        return TYPE_BOOK;
     }
 
     @NonNull
     @Override
-    public BooksListRecyclerViewAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_COLLECTION_HEADER) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.header_book_detail, parent, false);
+            return new HeaderViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_book, parent, false);
+        BookMotion.attachPressEffect(view);
         return new BooksListRecyclerViewAdapterViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BooksListRecyclerViewAdapterViewHolder holder, int position) {
-        Book book = filteredBooks.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder rawHolder, int position) {
+        if (rawHolder instanceof HeaderViewHolder) {
+            BookDetailHeader.bind(rawHolder.itemView, collectionBook, R.string.Volumes);
+            return;
+        }
 
-        String bookNameFull = book.getName();
-        String bookAuthorFull = book.getAuthor();
-        holder.bookName.setTextColor(MyColor.getTitleTextColor(context));
-        holder.bookAuthor.setTextColor(MyColor.getDetailTextColor(context));
+        BooksListRecyclerViewAdapterViewHolder holder = (BooksListRecyclerViewAdapterViewHolder) rawHolder;
+        Book book = filteredBooks.get(position - headerCount());
+
+        SearchHighlight.bindListRow(
+                context,
+                book,
+                searchString,
+                holder.bookName,
+                holder.bookAuthor,
+                holder.matchReason
+        );
         holder.separator.setBackgroundColor(MyColor.getSeparatorColor(context));
 
-        // highlight search text
-        if (searchString != null && !searchString.isEmpty()) {
-            int startPos = bookNameFull.toLowerCase(Locale.US).indexOf(searchString.toLowerCase(Locale.US));
-            int endPos = startPos + searchString.length();
-
-            if (startPos != -1) {
-                Spannable spannable = new SpannableString(bookNameFull);
-                ColorStateList blueColor = new ColorStateList(new int[][]{new int[]{}}, new int[]{Color.rgb(252,147,0)});
-                TextAppearanceSpan highlightSpan = new TextAppearanceSpan(null, Typeface.BOLD, -1, blueColor, null);
-                spannable.setSpan(highlightSpan, startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                holder.bookName.setText(spannable);
-            } else {
-                holder.bookName.setText(bookNameFull);
-            }
-        } else {
-            holder.bookName.setText(bookNameFull);
-        }
-
-        // highlight search text
-        if (searchString != null && !searchString.isEmpty()) {
-            int startPos = bookAuthorFull.toLowerCase(Locale.US).indexOf(searchString.toLowerCase(Locale.US));
-            int endPos = startPos + searchString.length();
-
-            if (startPos != -1) {
-                Spannable spannable = new SpannableString(bookAuthorFull);
-                ColorStateList blueColor = new ColorStateList(new int[][]{new int[]{}}, new int[]{Color.rgb(252,147,0)});
-                TextAppearanceSpan highlightSpan = new TextAppearanceSpan(null, Typeface.BOLD, -1, blueColor, null);
-                spannable.setSpan(highlightSpan, startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                holder.bookAuthor.setText(spannable);
-            } else {
-                holder.bookAuthor.setText(bookAuthorFull);
-            }
-        } else {
-            holder.bookAuthor.setText(bookAuthorFull);
-        }
+        ReadingProgressHelper.bindProgressRow(context, book,
+                holder.progressText, holder.progressBar);
+        ReadingProgressHelper.bindOfflineBadge(context, book, holder.offlineBadge);
 
         try {
             // get input stream
-            InputStream ims = context.getAssets().open("covers/" +book.getImageName() + ".png");
+            InputStream ims = context.getAssets().open("covers/" + book.getBookCover() + ".png");
             // load image as Drawable
             Drawable d = Drawable.createFromStream(ims, null);
             // set image to ImageView
             holder.bookImage.setImageDrawable(d);
             ims.close();
         } catch (IOException ex) {
-            return;
+            holder.bookImage.setImageResource(R.drawable.cover_placeholder);
         }
+
+        holder.bookImage.setContentDescription(book.getName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent companyInfoIntent = new Intent(context, BookChapterActivity.class);
-                companyInfoIntent.putExtra("book", book);
-                context.startActivity(companyInfoIntent);
+                BookOpener.open(context, book);
             }
         });
 
-        if(BookLibrary.shared.have(holder.itemView.getContext(), book)) {
-            holder.shineButton.setChecked(true);
-        } else {
-            holder.shineButton.setChecked(false);
-        }
+        holder.itemView.setOnLongClickListener(null);
 
-        final View shineButtonParent = (View) holder.shineButton.getParent();  // button: the view you want to enlarge hit area
-        shineButtonParent.post( new Runnable() {
-            public void run() {
-                final Rect rect = new Rect();
-                holder.shineButton.getHitRect(rect);
-                rect.top -= 16;
-                rect.bottom += 16;    // increase top hit area
-                rect.left -= 16;   // increase left hit area
-                rect.right += 16;  // increase right hit area
-                shineButtonParent.setTouchDelegate( new TouchDelegate( rect , holder.shineButton));
-            }
-        });
-
-        holder.shineButton.setOnClickListener(new View.OnClickListener() {
+        boolean saved = LibraryRepository.getInstance(holder.itemView.getContext()).isFavorite(book);
+        holder.shineButton.setClickable(false);
+        holder.shineButton.setFocusable(false);
+        holder.shineButton.setChecked(saved);
+        holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
+                saved ? R.string.remove_from_library : R.string.save_to_library));
+        holder.likeHost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (holder.shineButton.isChecked()) {
-                    BookLibrary.shared.save(holder.itemView.getContext(), book);
+                boolean next = !holder.shineButton.isChecked();
+                holder.shineButton.setChecked(next, true);
+                holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
+                        next ? R.string.remove_from_library : R.string.save_to_library));
+                LibraryRepository libraryRepository = LibraryRepository.getInstance(holder.itemView.getContext());
+                if (next) {
+                    libraryRepository.addFavorite(book);
 
                     String addedString = holder.itemView.getContext().getResources().getString(R.string.Library_added);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(holder.itemView.getContext(),
-                            addedString + ": " + book.getName(),Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    Intent intent1 = new Intent(Constants.NotificationHomeBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent1);
-                    Intent intent2 = new Intent(Constants.NotificationLibraryBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent2);
+                    DialogChrome.snack(holder.itemView, addedString + ": " + book.getName());
                 } else {
-                    BookLibrary.shared.remove(holder.itemView.getContext(), book);
+                    libraryRepository.removeFavorite(book);
                     String removedString = holder.itemView.getContext().getResources().getString(R.string.Library_removed);
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(holder.itemView.getContext(),
-                            removedString + ": " + book.getName(),Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    Intent intent1 = new Intent(Constants.NotificationHomeBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent1);
-                    Intent intent2 = new Intent(Constants.NotificationLibraryBookChange);
-                    LocalBroadcastManager.getInstance(holder.itemView.getContext()).sendBroadcast(intent2);
+                    DialogChrome.snack(holder.itemView, removedString + ": " + book.getName());
                 }
             }
         });
     }
 
+    public int getFilteredCount() {
+        return filteredBooks.size();
+    }
+
+    public void replaceBooks(ArrayList<Book> newBooks) {
+        this.books = newBooks != null ? newBooks : new ArrayList<>();
+        this.filteredBooks = new ArrayList<>(this.books);
+        notifyDataSetChanged();
+        notifyFilterPublished();
+    }
+
+    public void replaceBooks(ArrayList<Book> newBooks, String query) {
+        this.books = newBooks != null ? newBooks : new ArrayList<>();
+        this.searchString = query == null ? "" : query.trim();
+        this.filteredBooks = applySearch(this.books, searchString);
+        notifyDataSetChanged();
+        notifyFilterPublished();
+    }
+
+    public void setSearchQuery(String query) {
+        this.searchString = query == null ? "" : query.trim();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
-        return filteredBooks.size();
+        return filteredBooks.size() + headerCount();
     }
 
     @Override
@@ -192,59 +200,83 @@ public class BooksListRecyclerViewAdapter extends RecyclerView.Adapter<BooksList
         return booksFilter;
     }
 
+    private List<Book> applySearch(List<Book> source, String query) {
+        List<Book> filteredList = new ArrayList<>();
+        if (query == null || query.trim().isEmpty()) {
+            filteredList.addAll(source);
+            return filteredList;
+        }
+        String filterPattern = query.toLowerCase().trim();
+        for (Book book : source) {
+            if (LiteraryCopy.shared.matchesSearch(book, filterPattern)) {
+                filteredList.add(book);
+            }
+        }
+        return filteredList;
+    }
+
+    private void notifyFilterPublished() {
+        if (filterPublishedListener != null) {
+            filterPublishedListener.onFilterPublished(filteredBooks.size());
+        }
+    }
+
     private Filter booksFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<Book> filteredList = new ArrayList<>();
-
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(books);
-                searchString = "";
-            } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-                searchString = filterPattern;
-
-                for (Book book : books) {
-                    if (book.getName().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(book);
-                        continue;
-                    }
-                    if (book.getAuthor().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(book);
-                    }
-                }
-            }
-
+            String query = constraint == null ? "" : constraint.toString().trim();
+            List<Book> filteredList = applySearch(books, query);
             FilterResults results = new FilterResults();
             results.values = filteredList;
-
+            results.count = filteredList.size();
             return results;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
+            searchString = constraint == null ? "" : constraint.toString().trim();
             filteredBooks.clear();
-            filteredBooks.addAll((List) results.values);
+            if (results != null && results.values instanceof List) {
+                //noinspection unchecked
+                filteredBooks.addAll((List<Book>) results.values);
+            }
             notifyDataSetChanged();
+            notifyFilterPublished();
         }
     };
+
+    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        public HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
 
     public class BooksListRecyclerViewAdapterViewHolder extends RecyclerView.ViewHolder {
 
         TextView bookName;
         TextView bookAuthor;
+        TextView matchReason;
+        TextView progressText;
+        TextView offlineBadge;
+        ProgressBar progressBar;
         ImageView bookImage;
         View separator;
         ShineButton shineButton;
+        View likeHost;
 
 
         public BooksListRecyclerViewAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             bookName = itemView.findViewById(R.id.row_book_name);
             bookAuthor = itemView.findViewById(R.id.row_book_author);
+            matchReason = itemView.findViewById(R.id.row_book_match_reason);
+            progressText = itemView.findViewById(R.id.row_book_progress_text);
+            offlineBadge = itemView.findViewById(R.id.row_book_offline_badge);
+            progressBar = itemView.findViewById(R.id.row_book_progress);
             bookImage = itemView.findViewById(R.id.row_book_image_view);
             separator = itemView.findViewById(R.id.books_list_separator);
             shineButton = itemView.findViewById(R.id.like);
+            likeHost = itemView.findViewById(R.id.like_host);
         }
     }
 }
