@@ -10,13 +10,15 @@ import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Layout;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
+import android.view.ActionMode;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +27,11 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
+import android.widget.LinearLayout;
+
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.OnBackPressedCallback;
@@ -36,6 +43,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.appsbay.chineseclassicalliteratural.Model.Book;
 import com.appsbay.chineseclassicalliteratural.Model.BookChapter;
+import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.R;
 import com.appsbay.chineseclassicalliteratural.Tools.AdCoordinator;
 import com.appsbay.chineseclassicalliteratural.Tools.BookMotion;
@@ -43,13 +51,21 @@ import com.appsbay.chineseclassicalliteratural.Tools.LocalBroadcastHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
 import com.appsbay.chineseclassicalliteratural.Tools.ReaderOptionsSheet;
+import com.appsbay.chineseclassicalliteratural.Tools.ReaderContent;
+import com.appsbay.chineseclassicalliteratural.Tools.ReaderMarks;
+import com.appsbay.chineseclassicalliteratural.Tools.ReaderSpeech;
+import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
 import com.appsbay.chineseclassicalliteratural.viewmodel.NovelsHubViewModelFactory;
 import com.appsbay.chineseclassicalliteratural.viewmodel.ReaderViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.slider.Slider;
+import android.speech.tts.Voice;
 
-import java.util.Locale;
+import java.util.List;
+import java.io.IOException;
 
 public class BookPagerActivity extends AppCompatActivity {
     Book book;
@@ -67,7 +83,14 @@ public class BookPagerActivity extends AppCompatActivity {
 
     Context mContext;
 
-    TextToSpeech tts;
+    private ReaderSpeech speechController;
+    private ReaderMarks marks;
+    private BackgroundColorSpan speechHighlight;
+    private MaterialButton speechPlayButton;
+    private int searchFocusOffset = -1;
+    private int searchFocusLength;
+    private static final int ACTION_HIGHLIGHT = 92101;
+    private static final int ACTION_NOTE = 92102;
     private long readingStartedAt;
     private int restoredScrollY;
     private boolean didScroll;
@@ -106,6 +129,8 @@ public class BookPagerActivity extends AppCompatActivity {
         }
         chapterIndex = intent.getIntExtra("chapterIndex", -1);
         totalChapters = intent.getIntExtra("totalChapters", 0);
+        searchFocusOffset = intent.getIntExtra("focusOffset", -1);
+        searchFocusLength = intent.getIntExtra("focusLength", 0);
 
         readerViewModel = new ViewModelProvider(
                 this,
@@ -133,8 +158,24 @@ public class BookPagerActivity extends AppCompatActivity {
         readerChrome = findViewById(R.id.book_pager_chrome);
         readingProgress = findViewById(R.id.book_pager_reading_progress);
 
+        marks = new ReaderMarks(this);
+        speechController = new ReaderSpeech(this, new ReaderSpeech.Listener() {
+            @Override public void onPosition(boolean playing, int start, int end) {
+                showSpokenRange(playing ? start : -1, playing ? end : -1);
+                if (speechPlayButton != null) {
+                    speechPlayButton.setText(playing ? R.string.pause_reading
+                            : speechController.hasSession() ? R.string.resume_reading
+                            : R.string.Begin_Reading);
+                }
+            }
+            @Override public void onUnavailable() {
+                Toast.makeText(BookPagerActivity.this, R.string.speech_unavailable, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         titleTextView.setText(bookChapter.getChapterName());
-        textView.setText(formatChapterText(bookChapter.getText()));
+        renderChapterText();
+        setupSelectionActions();
         titleTextView.setTextColor(MyColor.getTitleTextColor(mContext));
         textView.setTextColor(MyColor.getTitleTextColor(mContext));
         updateChapterProgressLabel();
@@ -183,9 +224,12 @@ public class BookPagerActivity extends AppCompatActivity {
         scrollView.post(new Runnable() {
             @Override
             public void run() {
-                float gotoPostion = readerViewModel.getSavedScrollFraction();
+                float gotoPostion = intent.getFloatExtra("focusFraction", -1f);
+                if (gotoPostion < 0) gotoPostion = readerViewModel.getSavedScrollFraction();
                 int y = (int) (gotoPostion * scrollView.getChildAt(0).getHeight());
                 scrollView.scrollTo(0, y);
+                int focusOffset = intent.getIntExtra("focusOffset", -1);
+                if (focusOffset >= 0) scrollToTextOffset(focusOffset, true);
                 restoredScrollY = scrollView.getScrollY();
                 lastScrollY = restoredScrollY;
                 updateReadingProgressIndicator();
@@ -403,9 +447,10 @@ public class BookPagerActivity extends AppCompatActivity {
         BookMotion.swapPage(pageContent, previous, () -> {
             bookChapter = adjacent;
             chapterIndex = readerViewModel.getChapterIndex();
+            searchFocusOffset = -1;
             setTitle(bookChapter.getChapterNumberName());
             titleTextView.setText(bookChapter.getChapterName());
-            textView.setText(formatChapterText(bookChapter.getText()));
+            renderChapterText();
             updateChapterProgressLabel();
             didScroll = false;
             setReaderChromeVisible(true, false);
@@ -523,6 +568,7 @@ public class BookPagerActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         saveReadingProgress();
+        if (speechController != null && speechController.isPlaying()) speechController.pause();
         super.onPause();
     }
 
@@ -562,6 +608,7 @@ public class BookPagerActivity extends AppCompatActivity {
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(backgroundReceiver);
         stopSpeaking();
+        if (marks != null) marks.close();
         super.onDestroy();
     }
 
@@ -579,11 +626,7 @@ public class BookPagerActivity extends AppCompatActivity {
     };
 
     private void stopSpeaking() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-            tts = null;
-        }
+        if (speechController != null) speechController.stop();
     }
 
     private void configColor() {
@@ -596,7 +639,7 @@ public class BookPagerActivity extends AppCompatActivity {
 
         ScreenChrome.tint(this);
         tintChapterNavButtons();
-        textView.setText(formatChapterText(bookChapter.getText()));
+        renderChapterText();
     }
 
     @Override
@@ -636,28 +679,19 @@ public class BookPagerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onToggleSpeech() {
-                if (tts != null && tts.isSpeaking()) {
-                    stopSpeaking();
-                } else {
-                    tts = new TextToSpeech(mContext, status -> {
-                        if (status == TextToSpeech.SUCCESS) {
-                            int result = tts.setLanguage(Locale.CHINESE);
-                            if (result == TextToSpeech.LANG_MISSING_DATA
-                                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                Log.e("error", "This Language is not supported");
-                            } else {
-                                speech(bookChapter.getText());
-                            }
-                        }
-                    });
-                }
+            public void onSpeechControls() {
+                showSpeechControls();
             }
 
-            @Override
-            public boolean isSpeaking() {
-                return tts != null && tts.isSpeaking();
+            @Override public void onSearch() {
+                startActivity(new Intent(BookPagerActivity.this, ReaderCollectionActivity.class));
             }
+            @Override public void onBookmark() { bookmarkPosition(); }
+            @Override public void onSavedPassages() {
+                startActivity(new Intent(BookPagerActivity.this, ReaderCollectionActivity.class)
+                        .putExtra(ReaderCollectionActivity.EXTRA_MARKS, true));
+            }
+            @Override public void onSwitchScript() { switchScript(); }
         });
     }
 
@@ -688,45 +722,218 @@ public class BookPagerActivity extends AppCompatActivity {
         return (float) scrollView.getScrollY() / height;
     }
 
-    private void speech(String charSequence) {
-        if (tts == null || charSequence == null || charSequence.isEmpty()) {
-            return;
-        }
-        // TextToSpeech rejects anything past its max input length, so feed it
-        // sentence-sized chunks instead of cutting words in half.
-        int maxLength = Math.max(200, TextToSpeech.getMaxSpeechInputLength() - 1);
-        int start = 0;
-        int length = charSequence.length();
-        while (start < length) {
-            int end = Math.min(start + maxLength, length);
-            if (end < length) {
-                int boundary = lastBreakBefore(charSequence, start, end);
-                if (boundary > start) {
-                    end = boundary;
+    private void renderChapterText() {
+        if (textView == null || bookChapter == null) return;
+        SpannableStringBuilder styled = new SpannableStringBuilder(formatChapterText(bookChapter.getText()));
+        if (marks != null && chapterIndex >= 0) {
+            for (ReaderMarks.Mark mark : marks.forChapter(book,
+                    BookStore.shared.isTraditional(book), chapterIndex)) {
+                if (ReaderMarks.HIGHLIGHT.equals(mark.type) && mark.start >= 0
+                        && mark.end <= styled.length() && mark.start < mark.end) {
+                    styled.setSpan(new BackgroundColorSpan(0x66D8A346), mark.start, mark.end,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
-            String chunk = charSequence.substring(start, end).trim();
-            if (!chunk.isEmpty()) {
-                tts.speak(chunk, TextToSpeech.QUEUE_ADD, null, "chapter-" + start);
+        }
+        if (searchFocusOffset >= 0 && searchFocusLength > 0
+                && searchFocusOffset + searchFocusLength <= styled.length()) {
+            styled.setSpan(new BackgroundColorSpan(0x88D8A346), searchFocusOffset,
+                    searchFocusOffset + searchFocusLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        textView.setText(styled, TextView.BufferType.SPANNABLE);
+        speechHighlight = null;
+    }
+
+    private void setupSelectionActions() {
+        textView.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                menu.add(0, ACTION_HIGHLIGHT, 10, R.string.highlight_passage);
+                menu.add(0, ACTION_NOTE, 11, R.string.add_note);
+                return true;
             }
-            start = end;
+            @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) { return false; }
+            @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                if (item.getItemId() != ACTION_HIGHLIGHT && item.getItemId() != ACTION_NOTE) return false;
+                int start = Math.min(textView.getSelectionStart(), textView.getSelectionEnd());
+                int end = Math.max(textView.getSelectionStart(), textView.getSelectionEnd());
+                if (start < 0 || end <= start || end > bookChapter.getText().length()) return true;
+                String quote = bookChapter.getText().substring(start, Math.min(end, start + 500))
+                        + (end - start > 500 ? "…" : "");
+                if (item.getItemId() == ACTION_NOTE) {
+                    EditText note = new EditText(BookPagerActivity.this);
+                    note.setMinLines(3);
+                    note.setHint(R.string.note_hint);
+                    new AlertDialog.Builder(BookPagerActivity.this).setTitle(R.string.add_note)
+                            .setView(note).setNegativeButton(R.string.Cancel, null)
+                            .setPositiveButton(R.string.OK, (d, w) -> saveHighlight(start, end, quote,
+                                    note.getText().toString().trim())).show();
+                } else saveHighlight(start, end, quote, "");
+                mode.finish();
+                return true;
+            }
+            @Override public void onDestroyActionMode(ActionMode mode) {}
+        });
+    }
+
+    private void saveHighlight(int start, int end, String quote, String note) {
+        marks.add(book, BookStore.shared.isTraditional(book), chapterIndex,
+                start, end, scrollFraction(), ReaderMarks.HIGHLIGHT, quote, note);
+        renderChapterText();
+        Toast.makeText(this, R.string.passage_saved, Toast.LENGTH_SHORT).show();
+    }
+
+    private void bookmarkPosition() {
+        marks.add(book, BookStore.shared.isTraditional(book), chapterIndex,
+                -1, -1, scrollFraction(), ReaderMarks.BOOKMARK, "", "");
+        Toast.makeText(this, R.string.bookmark_saved, Toast.LENGTH_SHORT).show();
+    }
+
+    private void switchScript() {
+        if (chapterTransitionRunning) return;
+        boolean targetTraditional = !BookStore.shared.isTraditional(book);
+        Book target = null;
+        for (Book variant : BookStore.shared.variantsForId(book.getId())) {
+            if (BookStore.shared.isTraditional(variant) == targetTraditional) target = variant;
+        }
+        if (target == null) {
+            Toast.makeText(this, R.string.chapter_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        saveReadingProgress();
+        chapterTransitionRunning = true;
+        Book finalTarget = target;
+        int mapped = BookStore.shared.chapterIndexFor(target, chapterIndex,
+                BookStore.shared.isTraditional(book));
+        float fraction = scrollFraction();
+        new Thread(() -> {
+            try {
+                List<BookChapter> chapters = ReaderContent.load(getApplicationContext(), finalTarget);
+                runOnUiThread(() -> {
+                    chapterTransitionRunning = false;
+                    if (isFinishing() || isDestroyed()) return;
+                    if (mapped < 0 || mapped >= chapters.size()) {
+                        Toast.makeText(this, R.string.chapter_unavailable, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    BookStore.shared.setTraditional(this, targetTraditional);
+                    stopSpeaking();
+                    Intent intent = new Intent(this, BookPagerActivity.class);
+                    intent.putExtra("book", finalTarget);
+                    intent.putExtra("bookChapter", chapters.get(mapped));
+                    intent.putExtra("chapterIndex", mapped);
+                    intent.putExtra("totalChapters", chapters.size());
+                    intent.putExtra("focusFraction", fraction);
+                    startActivity(intent);
+                    finish();
+                });
+            } catch (IOException e) {
+                runOnUiThread(() -> {
+                    chapterTransitionRunning = false;
+                    Toast.makeText(this, R.string.chapter_unavailable, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private int visibleTextOffset() {
+        Layout layout = textView.getLayout();
+        if (layout == null) return 0;
+        int y = Math.max(0, scrollView.getScrollY() - textView.getTop());
+        return layout.getLineStart(layout.getLineForVertical(y));
+    }
+
+    private void scrollToTextOffset(int offset, boolean force) {
+        Layout layout = textView.getLayout();
+        if (layout == null || textView.length() == 0) return;
+        int safe = Math.max(0, Math.min(offset, textView.length() - 1));
+        int y = textView.getTop() + layout.getLineTop(layout.getLineForOffset(safe));
+        if (force || y < scrollView.getScrollY() || y > scrollView.getScrollY() + scrollView.getHeight() - dp(80)) {
+            scrollView.scrollTo(0, Math.max(0, y - dp(100)));
         }
     }
 
-    /** Last sentence end (or failing that, whitespace) inside [start, end). */
-    private static int lastBreakBefore(String text, int start, int end) {
-        for (int i = end - 1; i > start; i--) {
-            char c = text.charAt(i);
-            if (c == '.' || c == '!' || c == '?' || c == '\n') {
-                return i + 1;
-            }
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+
+    private void showSpokenRange(int start, int end) {
+        if (textView == null || !(textView.getText() instanceof Spannable)) return;
+        Spannable styled = (Spannable) textView.getText();
+        if (speechHighlight != null) styled.removeSpan(speechHighlight);
+        speechHighlight = null;
+        if (start >= 0 && end > start && end <= styled.length()) {
+            speechHighlight = new BackgroundColorSpan(0x775FAEA9);
+            styled.setSpan(speechHighlight, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            scrollToTextOffset(start, false);
         }
-        for (int i = end - 1; i > start; i--) {
-            if (Character.isWhitespace(text.charAt(i))) {
-                return i + 1;
+    }
+
+    private void showSpeechControls() {
+        BottomSheetDialog dialog = DialogChrome.bottomSheet(this);
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(24), dp(20), dp(24), dp(24));
+        TextView title = new TextView(this);
+        title.setText(R.string.speech_controls);
+        title.setTextSize(20);
+        title.setTextColor(MyColor.getTitleTextColor(this));
+        content.addView(title);
+        MaterialButton play = new MaterialButton(this);
+        speechPlayButton = play;
+        play.setText(speechController.isPlaying() ? R.string.pause_reading :
+                speechController.hasSession() ? R.string.resume_reading : R.string.Begin_Reading);
+        content.addView(play);
+        play.setOnClickListener(v -> {
+            if (speechController.isPlaying()) speechController.pause();
+            else if (speechController.hasSession()) speechController.resume();
+            else speechController.start(bookChapter.getText(), BookStore.shared.isTraditional(book),
+                        visibleTextOffset());
+            play.setText(speechController.isPlaying() ? R.string.pause_reading : R.string.resume_reading);
+        });
+        MaterialButton stop = new MaterialButton(this);
+        stop.setText(R.string.Stop_Reading);
+        content.addView(stop);
+        stop.setOnClickListener(v -> { stopSpeaking(); play.setText(R.string.Begin_Reading); });
+        TextView speedLabel = new TextView(this);
+        speedLabel.setText(getString(R.string.speech_speed, speechController.speed()));
+        speedLabel.setTextColor(MyColor.getTitleTextColor(this));
+        content.addView(speedLabel);
+        Slider speed = new Slider(this);
+        speed.setValueFrom(0.5f);
+        speed.setValueTo(2f);
+        speed.setStepSize(0.25f);
+        speed.setValue(speechController.speed());
+        speed.addOnChangeListener((s, value, fromUser) -> {
+            if (fromUser) {
+                speechController.setSpeed(value);
+                speedLabel.setText(getString(R.string.speech_speed, value));
             }
-        }
-        return end;
+        });
+        content.addView(speed);
+        MaterialButton voice = new MaterialButton(this);
+        voice.setText(R.string.choose_voice);
+        content.addView(voice);
+        voice.setOnClickListener(v -> {
+            if (!speechController.isReady()) {
+                Toast.makeText(this, R.string.start_reading_for_voices, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            List<Voice> voices = speechController.voices();
+            if (voices.isEmpty()) {
+                Toast.makeText(this, R.string.no_offline_voices, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String[] names = new String[voices.size()];
+            for (int i = 0; i < voices.size(); i++) {
+                Voice candidate = voices.get(i);
+                names[i] = candidate.getName()
+                        + (candidate.isNetworkConnectionRequired()
+                        ? " · " + getString(R.string.online_voice) : "");
+            }
+            new AlertDialog.Builder(this).setTitle(R.string.choose_voice).setItems(names,
+                    (d, which) -> speechController.setVoice(voices.get(which))).show();
+        });
+        DialogChrome.prepareSheet(dialog, content, this);
+        dialog.setOnDismissListener(d -> speechPlayButton = null);
+        dialog.show();
     }
 
     @Override

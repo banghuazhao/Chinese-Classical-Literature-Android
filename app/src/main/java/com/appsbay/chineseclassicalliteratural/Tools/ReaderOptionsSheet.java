@@ -24,9 +24,13 @@ public final class ReaderOptionsSheet {
 
         void onShare();
 
-        void onToggleSpeech();
+        void onSpeechControls();
 
-        boolean isSpeaking();
+        void onSearch();
+        void onBookmark();
+        void onSavedPassages();
+        void onSwitchScript();
+
     }
 
     public interface FontSizeCallbacks {
@@ -48,6 +52,10 @@ public final class ReaderOptionsSheet {
         MaterialButton background = content.findViewById(R.id.sheet_action_background);
         MaterialButton share = content.findViewById(R.id.sheet_action_share);
         MaterialButton tts = content.findViewById(R.id.sheet_action_tts);
+        MaterialButton search = content.findViewById(R.id.sheet_action_search);
+        MaterialButton bookmark = content.findViewById(R.id.sheet_action_bookmark);
+        MaterialButton marks = content.findViewById(R.id.sheet_action_marks);
+        MaterialButton script = content.findViewById(R.id.sheet_action_script);
 
         DialogChrome.tintSheetHandle(handle, activity);
         title.setTextColor(MyColor.getAccentColor(activity));
@@ -55,8 +63,12 @@ public final class ReaderOptionsSheet {
         DialogChrome.tintSheetAction(background, activity);
         DialogChrome.tintSheetAction(share, activity);
         DialogChrome.tintSheetAction(tts, activity);
+        DialogChrome.tintSheetAction(search, activity);
+        DialogChrome.tintSheetAction(bookmark, activity);
+        DialogChrome.tintSheetAction(marks, activity);
+        DialogChrome.tintSheetAction(script, activity);
 
-        tts.setText(callbacks.isSpeaking() ? R.string.Stop_Reading : R.string.Begin_Reading);
+        tts.setText(R.string.speech_controls);
 
         font.setOnClickListener(v -> {
             dialog.dismiss();
@@ -72,8 +84,12 @@ public final class ReaderOptionsSheet {
         });
         tts.setOnClickListener(v -> {
             dialog.dismiss();
-            callbacks.onToggleSpeech();
+            callbacks.onSpeechControls();
         });
+        search.setOnClickListener(v -> { dialog.dismiss(); callbacks.onSearch(); });
+        bookmark.setOnClickListener(v -> { dialog.dismiss(); callbacks.onBookmark(); });
+        marks.setOnClickListener(v -> { dialog.dismiss(); callbacks.onSavedPassages(); });
+        script.setOnClickListener(v -> { dialog.dismiss(); callbacks.onSwitchScript(); });
 
         DialogChrome.prepareSheet(dialog, content, activity);
         dialog.show();

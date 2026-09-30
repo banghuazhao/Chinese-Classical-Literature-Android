@@ -95,7 +95,7 @@ public final class BookDetailHeader {
         Context context = header.getContext();
         target.setClickable(true);
         target.setFocusable(true);
-        target.setContentDescription(context.getString(R.string.view_book_cover));
+        target.setContentDescription(context.getString(R.string.view_book_cover) + ": " + book.getName());
         BookMotion.attachPressEffect(target);
         target.setOnClickListener(v -> BookCoverViewer.show(context, book));
     }
@@ -112,7 +112,7 @@ public final class BookDetailHeader {
         }
 
         Context context = button.getContext();
-        boolean hasProgress = ReadingProgressHelper.getChapterIndex(context, book.getName()) >= 0;
+        boolean hasProgress = ReadingProgressHelper.getChapterIndex(context, book) >= 0;
         button.setVisibility(View.VISIBLE);
         button.setText(hasProgress ? R.string.continue_reading : R.string.Begin_Reading);
         button.setTextColor(accentColor);

@@ -57,7 +57,7 @@
                     android:id="@+id/book_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="@string/book_cover"
+                    android:importantForAccessibility="no"
                     android:scaleType="centerCrop"
                     android:src="@drawable/cover_placeholder" />
 
@@ -128,7 +128,7 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:paddingTop="@dimen/space_4"
-        android:textSize="11sp"
+        android:textSize="14sp"
         android:visibility="gone"
         tools:text="Matched in description"
         tools:visibility="visible" />

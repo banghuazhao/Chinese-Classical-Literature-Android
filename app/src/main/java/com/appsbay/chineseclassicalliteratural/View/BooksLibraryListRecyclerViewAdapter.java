@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.Model.Book;
@@ -31,6 +33,7 @@ import com.sackcentury.shinebuttonlib.ShineButton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BooksLibraryListRecyclerViewAdapter extends RecyclerView.Adapter<BooksLibraryListRecyclerViewAdapter.BooksListRecyclerViewAdapterViewHolder> implements Filterable {
@@ -114,6 +117,17 @@ public class BooksLibraryListRecyclerViewAdapter extends RecyclerView.Adapter<Bo
         boolean showDrag = dragEnabled && dragListener != null;
         holder.dragHandle.setVisibility(showDrag ? View.VISIBLE : View.GONE);
         if (showDrag) {
+            holder.dragHandle.setFocusable(true);
+            holder.dragHandle.setContentDescription(
+                    context.getString(R.string.reorder_favorites) + ": " + book.getName());
+            ViewCompat.replaceAccessibilityAction(holder.dragHandle,
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_BACKWARD,
+                    context.getString(R.string.move_up),
+                    (view, arguments) -> moveAccessible(holder, -1));
+            ViewCompat.replaceAccessibilityAction(holder.dragHandle,
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_FORWARD,
+                    context.getString(R.string.move_down),
+                    (view, arguments) -> moveAccessible(holder, 1));
             Drawable handle = holder.dragHandle.getDrawable();
             if (handle != null) {
                 handle = DrawableCompat.wrap(handle.mutate());
@@ -135,12 +149,12 @@ public class BooksLibraryListRecyclerViewAdapter extends RecyclerView.Adapter<Bo
         holder.shineButton.setFocusable(false);
         holder.shineButton.setChecked(saved);
         holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
-                saved ? R.string.remove_from_library : R.string.save_to_library));
+                saved ? R.string.remove_from_library : R.string.save_to_library) + ": " + book.getName());
         holder.likeHost.setOnClickListener(v -> {
             boolean next = !holder.shineButton.isChecked();
             holder.shineButton.setChecked(next, true);
             holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
-                    next ? R.string.remove_from_library : R.string.save_to_library));
+                    next ? R.string.remove_from_library : R.string.save_to_library) + ": " + book.getName());
             LibraryRepository libraryRepository = LibraryRepository.getInstance(holder.itemView.getContext());
             if (next) {
                 libraryRepository.addFavorite(book);
@@ -154,6 +168,19 @@ public class BooksLibraryListRecyclerViewAdapter extends RecyclerView.Adapter<Bo
                     DialogChrome.snack(holder.itemView, removedString + ": " + book.getName());
             }
         });
+    }
+
+    private boolean moveAccessible(RecyclerView.ViewHolder holder, int direction) {
+        int from = holder.getBindingAdapterPosition();
+        int to = from + direction;
+        if (from == RecyclerView.NO_POSITION || to < 0 || to >= books.size()) {
+            return false;
+        }
+        Collections.swap(books, from, to);
+        notifyItemMoved(from, to);
+        syncBooksFull();
+        LibraryRepository.getInstance(context).reorderFavorites(new ArrayList<>(books));
+        return true;
     }
 
     public void replaceBooks(ArrayList<Book> newBooks) {

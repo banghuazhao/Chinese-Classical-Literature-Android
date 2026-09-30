@@ -22,6 +22,7 @@ public final class ReadingProgressHelper {
     private static final String KEY_CHAPTER_NUMBER = "lastChapterNumberName";
     private static final String KEY_CHAPTER_NAME = "lastChapterName";
     private static final String KEY_UPDATED_AT = "lastUpdatedAt";
+    private static final String SCRIPT_SUFFIX = "_savedTraditional";
 
     private ReadingProgressHelper() {
     }
@@ -33,17 +34,21 @@ public final class ReadingProgressHelper {
             return;
         }
         context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE).edit()
-                .putString(KEY_BOOK, book.getName())
+                .putString(KEY_BOOK, book.getId())
                 .putInt(KEY_CHAPTER_INDEX, chapterIndex)
                 .putString(KEY_CHAPTER_NUMBER, chapterNumberName)
                 .putString(KEY_CHAPTER_NAME, chapterName)
                 .putLong(KEY_UPDATED_AT, System.currentTimeMillis())
                 .apply();
 
-        SharedPreferences.Editor editor = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE).edit();
-        editor.putInt(totalKey(book.getName()), totalChapters);
-        editor.putFloat(scrollKey(book.getName()), scrollFraction);
-        editor.apply();
+        context.getSharedPreferences(BOOKMARKS_PREFS, Context.MODE_PRIVATE).edit()
+                .putInt(book.getId(), chapterIndex)
+                .putBoolean(scriptKey(book.getId()), BookStore.shared.isTraditional(book))
+                .apply();
+        context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE).edit()
+                .putInt(totalKey(book), totalChapters)
+                .putFloat(scrollKey(book.getId()), scrollFraction)
+                .apply();
     }
 
     public static void markChapterOpened(Context context, Book book, int chapterIndex,
@@ -52,22 +57,19 @@ public final class ReadingProgressHelper {
         if (context == null || book == null) {
             return;
         }
-        int previousIndex = getChapterIndex(context, book.getName());
+        int previousIndex = getChapterIndex(context, book);
         float scroll = previousIndex == chapterIndex
-                ? getScrollFraction(context, book.getName())
+                ? getScrollFraction(context, book)
                 : 0f;
         // The previous app saved a per-chapter position in its own preference file.
         // Carry it forward the first time this reader opens that chapter.
         SharedPreferences progressPrefs = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE);
-        if (previousIndex == chapterIndex && !progressPrefs.contains(scrollKey(book.getName()))) {
+        if (previousIndex == chapterIndex && !progressPrefs.contains(scrollKey(book.getId()))) {
             String legacyKey = "bookName: " + book.getName() + ", chapterNumber: "
                     + chapterNumberName + ", chapterName: " + chapterName;
             scroll = context.getSharedPreferences(legacyKey, Context.MODE_PRIVATE)
                     .getFloat(legacyKey, scroll);
         }
-        context.getSharedPreferences(BOOKMARKS_PREFS, Context.MODE_PRIVATE).edit()
-                .putInt(book.getName(), chapterIndex)
-                .apply();
         saveSession(context, book, chapterIndex, chapterNumberName, chapterName, totalChapters, scroll);
     }
 
@@ -75,8 +77,24 @@ public final class ReadingProgressHelper {
         if (context == null || bookName == null) {
             return 0f;
         }
-        return context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE)
-                .getFloat(scrollKey(bookName), 0f);
+        Book book = BookStore.shared.bookForName(context, bookName);
+        return book == null ? 0f : getScrollFraction(context, book);
+    }
+
+    public static float getScrollFraction(Context context, Book book) {
+        if (context == null || book == null) return 0f;
+        SharedPreferences prefs = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE);
+        String key = scrollKey(book.getId());
+        if (prefs.contains(key)) return prefs.getFloat(key, 0f);
+        for (String name : BookStore.shared.namesForId(book.getId())) {
+            String legacyKey = scrollKey(name);
+            if (prefs.contains(legacyKey)) {
+                float fraction = prefs.getFloat(legacyKey, 0f);
+                prefs.edit().putFloat(key, fraction).apply();
+                return fraction;
+            }
+        }
+        return 0f;
     }
 
     public static void saveTotalChapters(Context context, Book book, int totalChapters) {
@@ -84,7 +102,7 @@ public final class ReadingProgressHelper {
             return;
         }
         context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE).edit()
-                .putInt(totalKey(book.getName()), totalChapters)
+                .putInt(totalKey(book), totalChapters)
                 .apply();
     }
 
@@ -93,20 +111,15 @@ public final class ReadingProgressHelper {
         if (context == null) {
             return null;
         }
-        String bookName = context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE)
+        String bookNameOrId = context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE)
                 .getString(KEY_BOOK, null);
-        if (bookName == null || bookName.isEmpty()) {
-            bookName = findMostRecentBookmarkedBook(context);
+        if (bookNameOrId == null || bookNameOrId.isEmpty()) {
+            bookNameOrId = findMostRecentBookmarkedBook(context);
         }
-        if (bookName == null || bookName.isEmpty()) {
+        if (bookNameOrId == null || bookNameOrId.isEmpty()) {
             return null;
         }
-        for (Book book : BookStore.shared.getBooks(context)) {
-            if (bookName.equals(book.getName())) {
-                return book;
-            }
-        }
-        return null;
+        return BookStore.shared.bookForId(context, BookStore.shared.idForName(bookNameOrId));
     }
 
     @Nullable
@@ -130,6 +143,11 @@ public final class ReadingProgressHelper {
         if (context == null) {
             return 0;
         }
+        Book book = getContinueReadingBook(context);
+        if (book != null) {
+            int index = getChapterIndex(context, book);
+            if (index >= 0) return index;
+        }
         return context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE)
                 .getInt(KEY_CHAPTER_INDEX, 0);
     }
@@ -140,6 +158,16 @@ public final class ReadingProgressHelper {
             return null;
         }
         SharedPreferences prefs = context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE);
+        Book book = getContinueReadingBook(context);
+        if (book != null) {
+            SharedPreferences bookmarks = context.getSharedPreferences(BOOKMARKS_PREFS, Context.MODE_PRIVATE);
+            if (bookmarks.contains(book.getId()) &&
+                    bookmarks.getBoolean(scriptKey(book.getId()), false) != BookStore.shared.isTraditional(book)) {
+                int index = getChapterIndex(context, book);
+                return context.getString(com.appsbay.chineseclassicalliteratural.R.string.reading_chapter_only,
+                        index + 1);
+            }
+        }
         String chapterName = prefs.getString(KEY_CHAPTER_NAME, null);
         if (chapterName != null && !chapterName.isEmpty()) {
             return chapterName;
@@ -152,29 +180,107 @@ public final class ReadingProgressHelper {
     }
 
     public static int getChapterIndex(Context context, String bookName) {
-        return context.getSharedPreferences(BOOKMARKS_PREFS, Context.MODE_PRIVATE)
-                .getInt(bookName, -1);
+        Book book = BookStore.shared.bookForName(context, bookName);
+        return book == null ? -1 : getChapterIndex(context, book);
+    }
+
+    public static int getChapterIndex(Context context, Book book) {
+        if (context == null || book == null) return -1;
+        SharedPreferences prefs = context.getSharedPreferences(BOOKMARKS_PREFS, Context.MODE_PRIVATE);
+        String id = book.getId();
+        if (!prefs.contains(scriptKey(id))) {
+            // Before work IDs, both script titles could have separate bookmarks.
+            // Prefer the title from the last reading session, then this edition.
+            String lastTitle = context.getSharedPreferences(CONTINUE_PREFS, Context.MODE_PRIVATE)
+                    .getString(KEY_BOOK, null);
+            Book source = null;
+            for (Book variant : BookStore.shared.variantsForId(id)) {
+                if (variant.getName().equals(lastTitle) && prefs.contains(variant.getName())) {
+                    source = variant;
+                    break;
+                }
+            }
+            if (source == null && prefs.contains(book.getName())) {
+                source = book;
+            }
+            if (source == null) {
+                for (Book variant : BookStore.shared.variantsForId(id)) {
+                    if (prefs.contains(variant.getName())) {
+                        source = variant;
+                        break;
+                    }
+                }
+            }
+            if (source != null) {
+                prefs.edit().putInt(id, prefs.getInt(source.getName(), -1))
+                        .putBoolean(scriptKey(id), BookStore.shared.isTraditional(source))
+                        .apply();
+                SharedPreferences progress = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE);
+                String oldScroll = scrollKey(source.getName());
+                if (progress.contains(oldScroll)) {
+                    progress.edit().putFloat(scrollKey(id), progress.getFloat(oldScroll, 0f)).apply();
+                }
+            }
+        }
+        if (!prefs.contains(id)) return -1;
+        // An id can equal the old simplified title. Its legacy bookmark has no script flag.
+        boolean sourceTraditional = prefs.getBoolean(scriptKey(id), false);
+        return BookStore.shared.chapterIndexFor(book, prefs.getInt(id, -1), sourceTraditional);
     }
 
     public static int getTotalChapters(Context context, String bookName) {
-        return context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE)
-                .getInt(totalKey(bookName), 0);
+        Book book = BookStore.shared.bookForName(context, bookName);
+        return book == null ? 0 : getTotalChapters(context, book);
+    }
+
+    public static int getTotalChapters(Context context, Book book) {
+        if (context == null || book == null) return 0;
+        SharedPreferences prefs = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE);
+        String currentKey = totalKey(book);
+        if (prefs.contains(currentKey)) return prefs.getInt(currentKey, 0);
+        for (Book source : BookStore.shared.variantsForId(book.getId())) {
+            if (BookStore.shared.isTraditional(source) == BookStore.shared.isTraditional(book)) continue;
+            String sourceKey = totalKey(source);
+            int total = prefs.getInt(sourceKey, 0);
+            if (total > 0) {
+                return BookStore.shared.chapterCountFor(book, total, BookStore.shared.isTraditional(source));
+            }
+        }
+        for (Book source : BookStore.shared.variantsForId(book.getId())) {
+            if (BookStore.shared.isTraditional(source) != BookStore.shared.isTraditional(book)) continue;
+            String legacyKey = totalKey(source.getName());
+            if (prefs.contains(legacyKey)) {
+                int total = prefs.getInt(legacyKey, 0);
+                prefs.edit().putInt(currentKey, total).apply();
+                return total;
+            }
+        }
+        for (Book source : BookStore.shared.variantsForId(book.getId())) {
+            if (BookStore.shared.isTraditional(source) == BookStore.shared.isTraditional(book)) continue;
+            String legacyKey = totalKey(source.getName());
+            if (prefs.contains(legacyKey)) {
+                int total = BookStore.shared.chapterCountFor(book,
+                        prefs.getInt(legacyKey, 0), BookStore.shared.isTraditional(source));
+                prefs.edit().putInt(currentKey, total).apply();
+                return total;
+            }
+        }
+        return 0;
     }
 
     public static int getProgressPercent(Context context, Book book) {
         if (context == null || book == null) {
             return -1;
         }
-        int chapterIndex = getChapterIndex(context, book.getName());
+        int chapterIndex = getChapterIndex(context, book);
         if (chapterIndex < 0) {
             return -1;
         }
-        int total = getTotalChapters(context, book.getName());
+        int total = getTotalChapters(context, book);
         if (total <= 0) {
             return -1;
         }
-        float scroll = context.getSharedPreferences(PROGRESS_PREFS, Context.MODE_PRIVATE)
-                .getFloat(scrollKey(book.getName()), 0f);
+        float scroll = getScrollFraction(context, book);
         float progress = ((chapterIndex + scroll) / total) * 100f;
         return Math.min(100, Math.max(0, Math.round(progress)));
     }
@@ -182,11 +288,11 @@ public final class ReadingProgressHelper {
     @Nullable
     public static String getProgressLabel(Context context, Book book) {
         int percent = getProgressPercent(context, book);
-        int chapterIndex = getChapterIndex(context, book.getName());
+        int chapterIndex = getChapterIndex(context, book);
         if (chapterIndex < 0) {
             return null;
         }
-        int total = getTotalChapters(context, book.getName());
+        int total = getTotalChapters(context, book);
         if (percent >= 0 && total > 0) {
             return context.getString(com.appsbay.chineseclassicalliteratural.R.string.reading_progress_label,
                     percent, chapterIndex + 1, total);
@@ -224,6 +330,14 @@ public final class ReadingProgressHelper {
 
     private static String totalKey(String bookName) {
         return bookName + "_total";
+    }
+
+    private static String totalKey(Book book) {
+        return book.getId() + (BookStore.shared.isTraditional(book) ? "_traditional_total" : "_simplified_total");
+    }
+
+    private static String scriptKey(String id) {
+        return id + SCRIPT_SUFFIX;
     }
 
     private static String scrollKey(String bookName) {

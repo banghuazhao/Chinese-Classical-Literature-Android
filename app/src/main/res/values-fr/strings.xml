@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_chapters">Rechercher dans le texte</string>
+    <string name="search_chapters_hint">Rechercher dans tous les livres</string>
+    <string name="searching_chapters">Recherche dans les livres hors ligne…</string>
+    <string name="search_results_hint">Touchez un résultat pour ouvrir le passage</string>
+    <string name="no_chapter_matches">Aucun passage trouvé</string>
+    <string name="saved_passages">Passages enregistrés</string>
+    <string name="saved_passages_hint">Touchez pour lire · Appui long pour modifier ou supprimer</string>
+    <string name="no_saved_passages">Aucun passage enregistré</string>
+    <string name="bookmark_position">Marquer cette position</string>
+    <string name="position_bookmark">Position de lecture</string>
+    <string name="bookmark_saved">Signet enregistré</string>
+    <string name="highlight_passage">Surligner</string>
+    <string name="add_note">Ajouter une note</string>
+    <string name="edit_note">Modifier la note</string>
+    <string name="note_hint">Votre note</string>
+    <string name="passage_saved">Passage enregistré</string>
+    <string name="delete_mark">Supprimer</string>
+    <string name="delete_mark_confirm">Supprimer ce passage ?</string>
+    <string name="chapter_number_short">Chapitre %1$d</string>
+    <string name="chapter_unavailable">Chapitre indisponible</string>
+    <string name="switch_script">Basculer entre 简 et 繁</string>
+    <string name="speech_controls">Lecture à voix haute</string>
+    <string name="pause_reading">Pause</string>
+    <string name="speech_speed">Vitesse : %1$.2f×</string>
+    <string name="choose_voice">Choisir une voix</string>
+    <string name="online_voice">En ligne</string>
+    <string name="start_reading_for_voices">Lancez la lecture pour charger les voix</string>
+    <string name="no_offline_voices">Aucune voix chinoise disponible</string>
+    <string name="speech_unavailable">La lecture vocale en chinois est indisponible</string>
     <string name="Feedback">Commentaires</string>
     <string name="Menu">Plus</string>
     <string name="Rate">Noter l’application</string>
@@ -120,4 +149,13 @@
     <string name="genre_crime_full">Policier et récits de détectives</string>
     <string name="Language">Langue</string>
     <string name="language_system_default">Système</string>
+    <string name="genre_classics">Quatre Livres et Cinq Classiques</string>
+    <string name="genre_philosophy">Écoles de pensée</string>
+    <string name="genre_fiction">Romans classiques</string>
+    <string name="genre_other">Autres œuvres</string>
+    <string name="book_script">Écriture des livres</string>
+    <string name="book_script_simplified">Chinois simplifié</string>
+    <string name="book_script_traditional">Chinois traditionnel</string>
+    <string name="move_up">Déplacer vers le haut</string>
+    <string name="move_down">Déplacer vers le bas</string>
 </resources>

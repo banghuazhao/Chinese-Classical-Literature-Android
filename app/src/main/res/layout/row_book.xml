@@ -27,7 +27,7 @@
             android:id="@+id/row_book_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/book_cover"
+            android:importantForAccessibility="no"
             android:scaleType="centerCrop"
             android:src="@drawable/cover_placeholder"
             tools:srcCompat="@tools:sample/avatars" />
@@ -83,7 +83,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textSize="11sp"
+            android:textSize="14sp"
             android:visibility="gone"
             tools:text="Matched in description"
             tools:visibility="visible" />
@@ -95,7 +95,7 @@
             android:layout_marginTop="@dimen/space_4"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textSize="11sp"
+            android:textSize="14sp"
             android:visibility="gone" />
 
         <TextView
@@ -105,7 +105,7 @@
             android:layout_marginTop="@dimen/space_4"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:visibility="gone"
             tools:text="42% · Ch 12/61"
             tools:visibility="visible" />
@@ -124,9 +124,10 @@
 
     <ImageView
         android:id="@+id/drag_handle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
         android:contentDescription="@string/reorder_favorites"
+        android:focusable="true"
         android:padding="8dp"
         android:src="@drawable/ic_drag_handle"
         android:visibility="gone"

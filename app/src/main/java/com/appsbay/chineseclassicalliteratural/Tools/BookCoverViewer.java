@@ -65,7 +65,7 @@ public final class BookCoverViewer {
         ImageButton info = content.findViewById(R.id.cover_viewer_info);
 
         BookDetailHeader.loadCover(image, book);
-        image.setContentDescription(book.getName());
+        image.setContentDescription(context.getString(R.string.book_cover) + ": " + book.getName());
 
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets bars = insets.getInsets(

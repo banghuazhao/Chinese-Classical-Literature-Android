@@ -6,51 +6,50 @@ import com.appsbay.chineseclassicalliteratural.Tools.TinyDB
 class BookLibrary {
 
     fun have(context: Context, book: Book): Boolean {
-        val tinydb = TinyDB(context)
-        val books = tinydb.getListString(BOOK_LIBRARY_KEY)
-        return books.contains(book.name)
+        return savedIds(context).contains(book.id)
     }
 
     fun save(context: Context, book: Book) {
         val tinydb = TinyDB(context)
-        val books = tinydb.getListString(BOOK_LIBRARY_KEY)
-        books.add(book.name)
-        tinydb.putListString(BOOK_LIBRARY_KEY, books)
+        val ids = savedIds(context)
+        if (!ids.contains(book.id)) {
+            ids.add(book.id)
+            tinydb.putListString(BOOK_LIBRARY_KEY, ids)
+        }
     }
 
     fun remove(context: Context, book: Book) {
         val tinydb = TinyDB(context)
-        val books = tinydb.getListString(BOOK_LIBRARY_KEY)
-        if (have(context, book)) {
-            books.remove(book.name)
-            tinydb.putListString(BOOK_LIBRARY_KEY, books)
+        val ids = savedIds(context)
+        if (ids.remove(book.id)) {
+            tinydb.putListString(BOOK_LIBRARY_KEY, ids)
         }
     }
 
     fun books(context: Context): ArrayList<Book> {
-        val result = ArrayList<Book>()
-        val tinydb = TinyDB(context)
-        val bookStrings = tinydb.getListString(BOOK_LIBRARY_KEY)
-
-        for (bookString in bookStrings) {
-            for (book in BookStore.shared.getAllBooks(context)) {
-                if (book.name == bookString) {
-                    result.add(book)
-                    break
-                }
-            }
-        }
-
-        return result
+        return ArrayList(savedIds(context).mapNotNull { BookStore.shared.bookForId(context, it) })
     }
 
     fun saveOrder(context: Context, orderedBooks: List<Book>) {
         val tinydb = TinyDB(context)
-        val names = ArrayList<String>(orderedBooks.size)
+        val ids = ArrayList<String>(orderedBooks.size)
         for (book in orderedBooks) {
-            names.add(book.name)
+            if (!ids.contains(book.id)) ids.add(book.id)
         }
-        tinydb.putListString(BOOK_LIBRARY_KEY, names)
+        tinydb.putListString(BOOK_LIBRARY_KEY, ids)
+    }
+
+    /** Older versions stored displayed titles. Convert them once without losing order. */
+    private fun savedIds(context: Context): ArrayList<String> {
+        val tinydb = TinyDB(context)
+        val stored = tinydb.getListString(BOOK_LIBRARY_KEY)
+        val ids = ArrayList<String>()
+        for (value in stored) {
+            val id = BookStore.shared.idForName(value)
+            if (!ids.contains(id)) ids.add(id)
+        }
+        if (stored != ids) tinydb.putListString(BOOK_LIBRARY_KEY, ids)
+        return ids
     }
 
     companion object {

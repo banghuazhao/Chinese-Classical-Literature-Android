@@ -128,3 +128,12 @@ dependencies {
 
     implementation 'com.google.ads.mediation:facebook:6.22.0.0'
 }
+
+tasks.register('validateCatalog', Exec) {
+    workingDir rootProject.projectDir
+    commandLine 'python3', 'scripts/validate_catalog.py'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('validateCatalog')
+}

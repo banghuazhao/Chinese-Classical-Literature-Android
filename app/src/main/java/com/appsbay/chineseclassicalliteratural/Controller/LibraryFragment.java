@@ -344,6 +344,15 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (id == R.id.library_menu_search_text) {
+            startActivity(new Intent(requireContext(), ReaderCollectionActivity.class));
+            return true;
+        }
+        if (id == R.id.library_menu_saved_passages) {
+            startActivity(new Intent(requireContext(), ReaderCollectionActivity.class)
+                    .putExtra(ReaderCollectionActivity.EXTRA_MARKS, true));
+            return true;
+        }
         if (id == R.id.library_menu_action_search) {
             return true;
         }

@@ -4,4 +4,6 @@
     <item name="tag_inset_padding_bottom" type="id" />
     <item name="tag_book_motion_press" type="id" />
     <item name="tag_book_motion_revealed" type="id" />
+    <item name="reader_search_input" type="id" />
+    <item name="reader_search_results" type="id" />
 </resources>

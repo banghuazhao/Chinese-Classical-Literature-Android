@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_chapters">本文を検索</string>
+    <string name="search_chapters_hint">すべての書籍から文章を検索</string>
+    <string name="searching_chapters">オフラインの書籍を検索中…</string>
+    <string name="search_results_hint">結果をタップして該当箇所を開く</string>
+    <string name="no_chapter_matches">該当する文章がありません</string>
+    <string name="saved_passages">保存した文章</string>
+    <string name="saved_passages_hint">タップして読む · 長押しして編集または削除</string>
+    <string name="no_saved_passages">保存した文章はありません</string>
+    <string name="bookmark_position">この位置をしおりに保存</string>
+    <string name="position_bookmark">読書位置</string>
+    <string name="bookmark_saved">しおりを保存しました</string>
+    <string name="highlight_passage">ハイライト</string>
+    <string name="add_note">メモを追加</string>
+    <string name="edit_note">メモを編集</string>
+    <string name="note_hint">メモを入力</string>
+    <string name="passage_saved">文章を保存しました</string>
+    <string name="delete_mark">削除</string>
+    <string name="delete_mark_confirm">この文章を削除しますか？</string>
+    <string name="chapter_number_short">第 %1$d 章</string>
+    <string name="chapter_unavailable">章を開けません</string>
+    <string name="switch_script">簡体字／繁体字を切り替え</string>
+    <string name="speech_controls">音声読み上げ</string>
+    <string name="pause_reading">一時停止</string>
+    <string name="speech_speed">速度：%1$.2f 倍</string>
+    <string name="choose_voice">音声を選択</string>
+    <string name="online_voice">オンライン</string>
+    <string name="start_reading_for_voices">読み上げを開始して音声を読み込んでください</string>
+    <string name="no_offline_voices">中国語の音声がありません</string>
+    <string name="speech_unavailable">この端末では中国語の読み上げを利用できません</string>
     <string name="Feedback">フィードバック</string>
     <string name="Menu">その他</string>
     <string name="Rate">アプリを評価</string>
@@ -119,4 +148,13 @@
     <string name="genre_crime_full">犯罪・探偵小説</string>
     <string name="Language">言語</string>
     <string name="language_system_default">システム</string>
+    <string name="genre_classics">四書五経</string>
+    <string name="genre_philosophy">諸子百家</string>
+    <string name="genre_fiction">古典小説</string>
+    <string name="genre_other">その他の作品</string>
+    <string name="book_script">書体</string>
+    <string name="book_script_simplified">簡体字中国語</string>
+    <string name="book_script_traditional">繁体字中国語</string>
+    <string name="move_up">上に移動</string>
+    <string name="move_down">下に移動</string>
 </resources>

@@ -2,7 +2,6 @@ package com.appsbay.chineseclassicalliteratural.View;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,17 +23,11 @@ import com.appsbay.chineseclassicalliteratural.Tools.ReadingProgressHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.LocalBroadcastHelper;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 public class BookChapterRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_CHAPTER = 1;
-
-    private static final Pattern CHAPTER_LABEL_PREFIX = Pattern.compile(
-            "^\\s*(?:chapters?|chap\\.?|parts?|books?|letters?|sections?)\\s*[.:]?\\s*",
-            Pattern.CASE_INSENSITIVE);
-    private static final Pattern TRAILING_PUNCTUATION = Pattern.compile("[.,:;]+$");
 
     Context context;
     ArrayList<BookChapter> bookChapters;
@@ -81,20 +74,22 @@ public class BookChapterRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
         BookChapter bookChapter = bookChapters.get(chapterIndex);
         BookChapterRecyclerViewViewHolder chapterHolder = (BookChapterRecyclerViewViewHolder) holder;
 
-        chapterHolder.bookNumber.setText(chapterBadgeLabel(bookChapter, chapterIndex));
+        chapterHolder.bookNumber.setText(String.valueOf(chapterIndex + 1));
         chapterHolder.bookNumber.setTextColor(MyColor.getAccentColor(context));
         if (chapterHolder.bookNumber.getBackground() != null) {
             chapterHolder.bookNumber.getBackground().mutate()
                     .setTint(MyColor.getAccentSurfaceColor(context));
         }
         chapterHolder.bookName.setText(bookChapter.getChapterName());
+        chapterHolder.itemView.setContentDescription(
+                context.getString(R.string.reading_chapter_only, chapterIndex + 1)
+                        + ": " + bookChapter.getChapterName());
         chapterHolder.bookName.setTextColor(MyColor.getTitleTextColor(context));
         if (chapterHolder.separator != null) {
             chapterHolder.separator.setBackgroundColor(MyColor.getSeparatorColor(context));
         }
 
-        SharedPreferences preferences = context.getSharedPreferences("Bookmarks", Context.MODE_PRIVATE);
-        int bookmarkNumber = preferences.getInt(book.getName(), 0);
+        int bookmarkNumber = ReadingProgressHelper.getChapterIndex(context, book);
         if (chapterIndex == bookmarkNumber) {
             chapterHolder.bookmark.setImageDrawable(MyImage.changeDrawableColor(context, R.drawable.nav_bookmark, MyColor.getAccentColor(context)));
         } else {
@@ -109,30 +104,11 @@ public class BookChapterRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
         });
     }
 
-    /**
-     * The index badge is only 72dp wide, so "CHAPTER XVIII" would ellipsize to
-     * "CHAPTE...". Strip the redundant leading word and keep just the numeral,
-     * falling back to the running position when the label is not a numeral.
-     */
-    private static String chapterBadgeLabel(BookChapter chapter, int chapterIndex) {
-        String position = String.valueOf(chapterIndex + 1);
-        String label = chapter.getChapterNumberName();
-        if (label == null || label.equals(chapter.getChapterName())) {
-            return position;
-        }
-        String numeral = CHAPTER_LABEL_PREFIX.matcher(label).replaceFirst("").trim();
-        numeral = TRAILING_PUNCTUATION.matcher(numeral).replaceAll("");
-        if (numeral.isEmpty() || numeral.length() > 7) {
-            return position;
-        }
-        return numeral;
-    }
-
     void continueReading() {
         if (bookChapters.isEmpty()) {
             return;
         }
-        int chapterIndex = ReadingProgressHelper.getChapterIndex(context, book.getName());
+        int chapterIndex = ReadingProgressHelper.getChapterIndex(context, book);
         if (chapterIndex < 0 || chapterIndex >= bookChapters.size()) {
             chapterIndex = 0;
         }

@@ -58,7 +58,7 @@ class ChapterViewModel(
 
     fun getContinueChapterIndex(): Int = readingRepository.getContinueChapterIndex()
 
-    fun getChapterBookmarkIndex(): Int = readingRepository.getChapterIndex(book.name)
+    fun getChapterBookmarkIndex(): Int = readingRepository.getChapterIndex(book)
 
     fun openChapter(chapter: BookChapter, chapterIndex: Int, totalChapters: Int) {
         readingRepository.markChapterOpened(

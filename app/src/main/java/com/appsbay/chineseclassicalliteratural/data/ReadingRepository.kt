@@ -27,11 +27,11 @@ class ReadingRepository private constructor(context: Context) {
         ReadingProgressHelper.getContinueChapterLabel(appContext)
 
     fun getProgress(book: Book): ReadingProgress? {
-        val chapterIndex = ReadingProgressHelper.getChapterIndex(appContext, book.name)
+        val chapterIndex = ReadingProgressHelper.getChapterIndex(appContext, book)
         if (chapterIndex < 0) {
             return null
         }
-        val total = ReadingProgressHelper.getTotalChapters(appContext, book.name)
+        val total = ReadingProgressHelper.getTotalChapters(appContext, book)
         val percent = ReadingProgressHelper.getProgressPercent(appContext, book)
         val label = ReadingProgressHelper.getProgressLabel(appContext, book)
         return ReadingProgress(
@@ -42,11 +42,11 @@ class ReadingRepository private constructor(context: Context) {
         )
     }
 
-    fun getChapterIndex(bookName: String): Int =
-        ReadingProgressHelper.getChapterIndex(appContext, bookName)
+    fun getChapterIndex(book: Book): Int =
+        ReadingProgressHelper.getChapterIndex(appContext, book)
 
-    fun getTotalChapters(bookName: String): Int =
-        ReadingProgressHelper.getTotalChapters(appContext, bookName)
+    fun getTotalChapters(book: Book): Int =
+        ReadingProgressHelper.getTotalChapters(appContext, book)
 
     fun saveSession(
         book: Book,
@@ -86,8 +86,8 @@ class ReadingRepository private constructor(context: Context) {
         refreshContinueReading()
     }
 
-    fun getScrollFraction(bookName: String): Float =
-        ReadingProgressHelper.getScrollFraction(appContext, bookName)
+    fun getScrollFraction(book: Book): Float =
+        ReadingProgressHelper.getScrollFraction(appContext, book)
 
     fun getTextSize(): Int {
         return appContext.getSharedPreferences("Font Preference", Context.MODE_PRIVATE)

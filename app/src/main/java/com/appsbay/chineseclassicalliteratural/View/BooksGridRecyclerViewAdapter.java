@@ -107,12 +107,12 @@ public class BooksGridRecyclerViewAdapter extends RecyclerView.Adapter<BooksGrid
         holder.shineButton.setFocusable(false);
         holder.shineButton.setChecked(saved);
         holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
-                saved ? R.string.remove_from_library : R.string.save_to_library));
+                saved ? R.string.remove_from_library : R.string.save_to_library) + ": " + book.getName());
         holder.likeHost.setOnClickListener(v -> {
             boolean next = !holder.shineButton.isChecked();
             holder.shineButton.setChecked(next, true);
             holder.likeHost.setContentDescription(holder.itemView.getContext().getString(
-                    next ? R.string.remove_from_library : R.string.save_to_library));
+                    next ? R.string.remove_from_library : R.string.save_to_library) + ": " + book.getName());
             LibraryRepository libraryRepository = LibraryRepository.getInstance(holder.itemView.getContext());
             if (next) {
                 libraryRepository.addFavorite(book);

@@ -3,12 +3,14 @@ package com.appsbay.chineseclassicalliteratural.Model
 import android.content.Context
 import android.os.Build
 import com.google.gson.JsonParser
+import com.google.gson.JsonObject
 import java.io.IOException
 import java.util.Locale
 
 class BookStore {
     private val simplified = ArrayList<Book>()
     private val traditional = ArrayList<Book>()
+    private val missingTraditionalChapters = HashMap<String, List<Int>>()
 
     fun getBooks(context: Context): ArrayList<Book> =
         if (usesTraditional(context)) traditional else simplified
@@ -28,6 +30,58 @@ class BookStore {
         if (simplified.isNotEmpty() || traditional.isNotEmpty()) return
         loadCatalog(context, "bookInfo-simplified.json", simplified)
         loadCatalog(context, "bookInfo-traditional.json", traditional)
+        loadChapterIndexMap(context)
+    }
+
+    fun idForName(name: String): String =
+        (simplified + traditional).firstOrNull { it.name == name || it.id == name }?.id ?: name
+
+    fun namesForId(id: String): List<String> =
+        (simplified + traditional).filter { it.id == id }.map { it.name }
+
+    fun variantsForId(id: String): List<Book> =
+        (simplified + traditional).filter { it.id == id }
+
+    fun bookForId(context: Context, id: String): Book? =
+        getBooks(context).firstOrNull { it.id == id }
+
+    fun bookForName(context: Context, name: String): Book? =
+        getAllBooks(context).firstOrNull { it.name == name }
+
+    fun isTraditional(book: Book): Boolean = book.bookType.name.endsWith("_Fan")
+
+    /** Map a saved chapter to the same work in the other script. */
+    fun chapterIndexFor(book: Book, savedIndex: Int, savedTraditional: Boolean): Int {
+        if (savedIndex < 0 || savedTraditional == isTraditional(book)) return savedIndex
+        val omitted = missingTraditionalChapters[book.id] ?: return savedIndex
+        if (isTraditional(book)) {
+            // If this exact chapter is absent, resume at its preceding chapter.
+            return savedIndex - omitted.count { it <= savedIndex }
+        }
+        var result = savedIndex
+        for (missing in omitted.sorted()) {
+            if (result >= missing) result++
+        }
+        return result
+    }
+
+    fun chapterCountFor(book: Book, savedTotal: Int, savedTraditional: Boolean): Int {
+        if (savedTraditional == isTraditional(book)) return savedTotal
+        val omitted = missingTraditionalChapters[book.id]?.size ?: 0
+        return savedTotal + if (isTraditional(book)) -omitted else omitted
+    }
+
+    private fun loadChapterIndexMap(context: Context) {
+        try {
+            context.assets.open("chapter-index-map.json").bufferedReader(Charsets.UTF_8).use { reader ->
+                val map: JsonObject = JsonParser.parseReader(reader).asJsonObject
+                for ((id, value) in map.entrySet()) {
+                    missingTraditionalChapters[id] = value.asJsonArray.map { it.asInt }
+                }
+            }
+        } catch (exception: IOException) {
+            exception.printStackTrace()
+        }
     }
 
     private fun loadCatalog(context: Context, fileName: String, into: ArrayList<Book>) {

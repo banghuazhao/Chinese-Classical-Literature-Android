@@ -8,4 +8,12 @@
         app:showAsAction="always|collapseActionView"
         app:searchHintIcon="@null"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+    <item
+        android:id="@+id/library_menu_search_text"
+        android:title="@string/search_chapters"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/library_menu_saved_passages"
+        android:title="@string/saved_passages"
+        app:showAsAction="never" />
 </menu>

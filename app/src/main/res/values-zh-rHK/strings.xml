@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_chapters">搜尋正文</string>
+    <string name="search_chapters_hint">搜尋所有書籍的正文</string>
+    <string name="searching_chapters">正在搜尋離線書籍…</string>
+    <string name="search_results_hint">點選結果跳至原文</string>
+    <string name="no_chapter_matches">找不到相關段落</string>
+    <string name="saved_passages">儲存的段落</string>
+    <string name="saved_passages_hint">點選閱讀，長按編輯或刪除</string>
+    <string name="no_saved_passages">尚無儲存的段落</string>
+    <string name="bookmark_position">書籤：目前位置</string>
+    <string name="position_bookmark">閱讀位置</string>
+    <string name="bookmark_saved">已儲存書籤</string>
+    <string name="highlight_passage">標示</string>
+    <string name="add_note">新增筆記</string>
+    <string name="edit_note">編輯筆記</string>
+    <string name="note_hint">輸入筆記</string>
+    <string name="passage_saved">已儲存段落</string>
+    <string name="delete_mark">刪除</string>
+    <string name="delete_mark_confirm">刪除此段落？</string>
+    <string name="chapter_number_short">第 %1$d 章</string>
+    <string name="chapter_unavailable">章節無法使用</string>
+    <string name="switch_script">切換簡／繁體</string>
+    <string name="speech_controls">朗讀控制</string>
+    <string name="pause_reading">暫停</string>
+    <string name="speech_speed">語速：%1$.2f 倍</string>
+    <string name="choose_voice">選擇語音</string>
+    <string name="online_voice">線上</string>
+    <string name="start_reading_for_voices">請先開始朗讀以載入語音</string>
+    <string name="no_offline_voices">沒有可用的中文語音</string>
+    <string name="speech_unavailable">此裝置不支援中文朗讀</string>
     <string name="Feedback">意見回饋</string>
     <string name="Menu">更多</string>
     <string name="Rate">為應用程式評分</string>
@@ -126,4 +155,6 @@
     <string name="book_script">書籍文字</string>
     <string name="book_script_simplified">簡體中文</string>
     <string name="book_script_traditional">繁體中文</string>
+    <string name="move_up">上移</string>
+    <string name="move_down">下移</string>
 </resources>

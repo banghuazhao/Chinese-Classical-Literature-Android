@@ -64,6 +64,10 @@
             android:parentActivityName=".Controller.BookChapterActivity" />
 
         <activity
+            android:name=".Controller.ReaderCollectionActivity"
+            android:parentActivityName=".Controller.MainActivity" />
+
+        <activity
             android:name=".Controller.Menu.MoreApps.MoreAppsActivity"
             android:parentActivityName=".Controller.MainActivity"
             android:theme="@style/Theme.NovelsHub.NoActionBar" />

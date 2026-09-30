@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/space_16">
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_16">
 
     <View
         android:id="@+id/sheet_handle"
@@ -62,9 +67,50 @@
         style="@style/Widget.NovelsHub.SheetAction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/Begin_Reading"
+        android:text="@string/speech_controls"
         app:icon="@drawable/nav_speaker"
         app:iconGravity="start"
         app:iconPadding="16dp" />
 
-</LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sheet_action_search"
+        style="@style/Widget.NovelsHub.SheetAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/search_chapters"
+        app:icon="@drawable/ic_search"
+        app:iconGravity="start"
+        app:iconPadding="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sheet_action_bookmark"
+        style="@style/Widget.NovelsHub.SheetAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bookmark_position"
+        app:icon="@drawable/nav_bookmark"
+        app:iconGravity="start"
+        app:iconPadding="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sheet_action_marks"
+        style="@style/Widget.NovelsHub.SheetAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/saved_passages"
+        app:icon="@drawable/nav_note"
+        app:iconGravity="start"
+        app:iconPadding="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sheet_action_script"
+        style="@style/Widget.NovelsHub.SheetAction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/switch_script"
+        app:icon="@drawable/nav_text_format"
+        app:iconGravity="start"
+        app:iconPadding="16dp" />
+
+    </LinearLayout>
+</ScrollView>

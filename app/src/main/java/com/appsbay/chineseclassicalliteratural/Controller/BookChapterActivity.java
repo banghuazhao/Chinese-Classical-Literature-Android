@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.Model.Book;
 import com.appsbay.chineseclassicalliteratural.Model.BookChapter;
+import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.R;
 import com.appsbay.chineseclassicalliteratural.Tools.AdsHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.AuthorBioSheet;
@@ -155,6 +156,16 @@ public class BookChapterActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (book != null && BookStore.shared.isTraditional(book)
+                != BookStore.shared.usesTraditional(this)) {
+            Book paired = BookStore.shared.bookForId(this, book.getId());
+            if (paired != null) {
+                startActivity(new Intent(this, BookChapterActivity.class)
+                        .putExtra(BookOpener.EXTRA_BOOK, paired));
+                finish();
+                return;
+            }
+        }
         // Theme may have changed in the reader while this screen was stopped.
         configColor();
         invalidateOptionsMenu();

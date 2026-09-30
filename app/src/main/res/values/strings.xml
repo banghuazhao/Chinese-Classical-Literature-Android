@@ -12,6 +12,35 @@
     <string name="rate_dialog_not_now">Not now</string>
     <string name="rate_dialog_rate">Rate</string>
     <string name="reader_options">Reading options</string>
+    <string name="search_chapters">Search text</string>
+    <string name="search_chapters_hint">Search passages in all books</string>
+    <string name="searching_chapters">Searching offline books…</string>
+    <string name="search_results_hint">Tap a result to open its passage</string>
+    <string name="no_chapter_matches">No passages found</string>
+    <string name="saved_passages">Saved passages</string>
+    <string name="saved_passages_hint">Tap to read · Long press to edit or delete</string>
+    <string name="no_saved_passages">No saved passages yet</string>
+    <string name="bookmark_position">Bookmark this position</string>
+    <string name="position_bookmark">Reading position</string>
+    <string name="bookmark_saved">Bookmark saved</string>
+    <string name="highlight_passage">Highlight</string>
+    <string name="add_note">Add note</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note_hint">Your note</string>
+    <string name="passage_saved">Passage saved</string>
+    <string name="delete_mark">Delete</string>
+    <string name="delete_mark_confirm">Delete this saved passage?</string>
+    <string name="chapter_number_short">Chapter %1$d</string>
+    <string name="chapter_unavailable">Chapter unavailable</string>
+    <string name="switch_script">Switch 简 / 繁</string>
+    <string name="speech_controls">Read aloud</string>
+    <string name="pause_reading">Pause</string>
+    <string name="speech_speed">Speed: %1$.2f×</string>
+    <string name="choose_voice">Choose voice</string>
+    <string name="online_voice">Online</string>
+    <string name="start_reading_for_voices">Start reading to load voices</string>
+    <string name="no_offline_voices">No Chinese voices available</string>
+    <string name="speech_unavailable">Chinese speech is unavailable on this device</string>
 
     <string name="MoreApps">More Apps</string>
     <string name="FinanceGo" translatable="false">Finance Go</string>
@@ -158,4 +187,6 @@
     <string name="book_script">Book script</string>
     <string name="book_script_simplified">Simplified Chinese</string>
     <string name="book_script_traditional">Traditional Chinese</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
 </resources>

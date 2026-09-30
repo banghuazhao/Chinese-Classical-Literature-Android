@@ -42,9 +42,9 @@ class ReaderViewModel(
     fun getChapterIndex(): Int = chapterIndex
 
     fun getSavedScrollFraction(): Float {
-        val savedIndex = readingRepository.getChapterIndex(book.name)
+        val savedIndex = readingRepository.getChapterIndex(book)
         return if (savedIndex == chapterIndex) {
-            readingRepository.getScrollFraction(book.name)
+            readingRepository.getScrollFraction(book)
         } else {
             0f
         }
@@ -59,12 +59,12 @@ class ReaderViewModel(
         val index = if (chapterIndex >= 0) {
             chapterIndex
         } else {
-            readingRepository.getChapterIndex(book.name).coerceAtLeast(0)
+            readingRepository.getChapterIndex(book).coerceAtLeast(0)
         }
         val total = if (totalChapters > 0) {
             totalChapters
         } else {
-            readingRepository.getTotalChapters(book.name)
+            readingRepository.getTotalChapters(book)
         }
         readingRepository.saveSession(
             book = book,

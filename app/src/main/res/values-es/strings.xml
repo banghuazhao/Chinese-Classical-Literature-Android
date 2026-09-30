@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_chapters">Buscar en el texto</string>
+    <string name="search_chapters_hint">Buscar pasajes en todos los libros</string>
+    <string name="searching_chapters">Buscando en libros sin conexión…</string>
+    <string name="search_results_hint">Toca un resultado para abrir el pasaje</string>
+    <string name="no_chapter_matches">No se encontraron pasajes</string>
+    <string name="saved_passages">Pasajes guardados</string>
+    <string name="saved_passages_hint">Toca para leer · Mantén pulsado para editar o borrar</string>
+    <string name="no_saved_passages">Aún no hay pasajes guardados</string>
+    <string name="bookmark_position">Guardar esta posición</string>
+    <string name="position_bookmark">Posición de lectura</string>
+    <string name="bookmark_saved">Marcador guardado</string>
+    <string name="highlight_passage">Resaltar</string>
+    <string name="add_note">Añadir nota</string>
+    <string name="edit_note">Editar nota</string>
+    <string name="note_hint">Tu nota</string>
+    <string name="passage_saved">Pasaje guardado</string>
+    <string name="delete_mark">Eliminar</string>
+    <string name="delete_mark_confirm">¿Eliminar este pasaje?</string>
+    <string name="chapter_number_short">Capítulo %1$d</string>
+    <string name="chapter_unavailable">Capítulo no disponible</string>
+    <string name="switch_script">Cambiar entre 简 y 繁</string>
+    <string name="speech_controls">Lectura en voz alta</string>
+    <string name="pause_reading">Pausar</string>
+    <string name="speech_speed">Velocidad: %1$.2f×</string>
+    <string name="choose_voice">Elegir voz</string>
+    <string name="online_voice">En línea</string>
+    <string name="start_reading_for_voices">Inicia la lectura para cargar las voces</string>
+    <string name="no_offline_voices">No hay voces chinas disponibles</string>
+    <string name="speech_unavailable">La lectura en chino no está disponible</string>
     <string name="Feedback">Comentarios</string>
     <string name="Menu">Más</string>
     <string name="Rate">Valorar la app</string>
@@ -120,4 +149,13 @@
     <string name="genre_crime_full">Policíaco y detectivesco</string>
     <string name="Language">Idioma</string>
     <string name="language_system_default">Sistema</string>
+    <string name="genre_classics">Cuatro Libros y Cinco Clásicos</string>
+    <string name="genre_philosophy">Escuelas de pensamiento</string>
+    <string name="genre_fiction">Novelas clásicas</string>
+    <string name="genre_other">Otras obras</string>
+    <string name="book_script">Escritura de los libros</string>
+    <string name="book_script_simplified">Chino simplificado</string>
+    <string name="book_script_traditional">Chino tradicional</string>
+    <string name="move_up">Mover arriba</string>
+    <string name="move_down">Mover abajo</string>
 </resources>

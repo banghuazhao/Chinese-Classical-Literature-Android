@@ -50,7 +50,7 @@
                     android:id="@+id/book_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="@string/book_cover"
+                    android:importantForAccessibility="no"
                     android:scaleType="centerCrop"
                     android:src="@drawable/cover_placeholder" />
 

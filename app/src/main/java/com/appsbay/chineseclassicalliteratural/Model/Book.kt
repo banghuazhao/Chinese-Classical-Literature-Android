@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.gson.JsonObject
 
 class Book : Parcelable {
+    var id: String = ""
     var name: String = ""
     var author: String = ""
     var fileName: String = ""
@@ -19,6 +20,7 @@ class Book : Parcelable {
 
     constructor(json: JsonObject) {
         name = json.get("name").asString
+        id = json.get("id")?.asString ?: name
         author = json.get("author").asString
         bookType = try {
             BookType.valueOf(json.get("bookType").asString)
@@ -49,6 +51,7 @@ class Book : Parcelable {
         isOnline = parcel.readByte().toInt() != 0
         isCollection = parcel.readByte().toInt() != 0
         parent = parcel.readString()
+        id = if (parcel.dataAvail() > 0) parcel.readString() ?: name else name
     }
 
     override fun describeContents(): Int = 0
@@ -62,6 +65,7 @@ class Book : Parcelable {
         dest.writeByte(if (isOnline) 1 else 0)
         dest.writeByte(if (isCollection) 1 else 0)
         dest.writeString(parent)
+        dest.writeString(id)
     }
 
     companion object {

@@ -86,7 +86,7 @@
                 android:maxWidth="@dimen/reader_text_max_width"
                 android:textAllCaps="true"
                 android:textColor="@color/ink_muted"
-                android:textSize="11sp" />
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:id="@+id/book_pager_chapter_nav"

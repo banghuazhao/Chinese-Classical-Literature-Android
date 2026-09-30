@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_chapters">पाठ में खोजें</string>
+    <string name="search_chapters_hint">सभी पुस्तकों में अंश खोजें</string>
+    <string name="searching_chapters">ऑफ़लाइन पुस्तकों में खोज जारी है…</string>
+    <string name="search_results_hint">अंश खोलने के लिए परिणाम पर टैप करें</string>
+    <string name="no_chapter_matches">कोई अंश नहीं मिला</string>
+    <string name="saved_passages">सहेजे गए अंश</string>
+    <string name="saved_passages_hint">पढ़ने के लिए टैप करें · बदलने या हटाने के लिए देर तक दबाएँ</string>
+    <string name="no_saved_passages">अभी कोई अंश सहेजा नहीं गया</string>
+    <string name="bookmark_position">यह स्थान बुकमार्क करें</string>
+    <string name="position_bookmark">पढ़ने का स्थान</string>
+    <string name="bookmark_saved">बुकमार्क सहेजा गया</string>
+    <string name="highlight_passage">हाइलाइट करें</string>
+    <string name="add_note">नोट जोड़ें</string>
+    <string name="edit_note">नोट बदलें</string>
+    <string name="note_hint">आपका नोट</string>
+    <string name="passage_saved">अंश सहेजा गया</string>
+    <string name="delete_mark">हटाएँ</string>
+    <string name="delete_mark_confirm">क्या यह अंश हटाना है?</string>
+    <string name="chapter_number_short">अध्याय %1$d</string>
+    <string name="chapter_unavailable">अध्याय उपलब्ध नहीं है</string>
+    <string name="switch_script">简 और 繁 बदलें</string>
+    <string name="speech_controls">बोलकर पढ़ें</string>
+    <string name="pause_reading">रोकें</string>
+    <string name="speech_speed">गति: %1$.2f×</string>
+    <string name="choose_voice">आवाज़ चुनें</string>
+    <string name="online_voice">ऑनलाइन</string>
+    <string name="start_reading_for_voices">आवाज़ लोड करने के लिए वाचन शुरू करें</string>
+    <string name="no_offline_voices">चीनी आवाज़ उपलब्ध नहीं है</string>
+    <string name="speech_unavailable">इस डिवाइस पर चीनी वाचन उपलब्ध नहीं है</string>
     <string name="Feedback">फ़ीडबैक</string>
     <string name="Menu">और</string>
     <string name="Rate">ऐप को रेट करें</string>
@@ -120,4 +149,13 @@
     <string name="genre_crime_full">अपराध और जासूसी कथा</string>
     <string name="Language">भाषा</string>
     <string name="language_system_default">सिस्टम</string>
+    <string name="genre_classics">चार पुस्तकें और पाँच क्लासिक्स</string>
+    <string name="genre_philosophy">विचारधाराएँ</string>
+    <string name="genre_fiction">शास्त्रीय कथा साहित्य</string>
+    <string name="genre_other">अन्य कृतियाँ</string>
+    <string name="book_script">पुस्तक की लिपि</string>
+    <string name="book_script_simplified">सरलीकृत चीनी</string>
+    <string name="book_script_traditional">पारंपरिक चीनी</string>
+    <string name="move_up">ऊपर ले जाएँ</string>
+    <string name="move_down">नीचे ले जाएँ</string>
 </resources>
