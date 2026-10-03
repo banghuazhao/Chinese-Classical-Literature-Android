@@ -1,14 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
-}
-
-afterEvaluate {
-    def mapSources = tasks.findByName('mapDebugSourceSetPaths')
-    def googleServices = tasks.findByName('processDebugGoogleServices')
-    if (mapSources != null && googleServices != null) {
-        mapSources.dependsOn googleServices
-    }
 }
 
 def localProperties = new Properties()
@@ -20,7 +11,10 @@ if (localPropertiesFile.exists()) {
 }
 
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('keystore.properties')
+def externalKeystoreProperties = System.getenv('RELEASE_KEYSTORE_PROPERTIES')
+def keystorePropertiesFile = externalKeystoreProperties
+        ? file(externalKeystoreProperties)
+        : rootProject.file('keystore.properties')
 def hasKeystore = keystorePropertiesFile.exists()
 if (hasKeystore) {
     keystorePropertiesFile.withReader('UTF-8') { reader ->
@@ -28,9 +22,41 @@ if (hasKeystore) {
     }
 }
 
-def AdMobAppId = localProperties.getProperty('AdMobAppId')
-if (AdMobAppId == null) {
-    AdMobAppId = 'ca-app-pub-3940256099942544~3347511713'
+def releaseAdValue = { String key ->
+    localProperties.getProperty(key, "MISSING_${key}").trim()
+}
+
+def validateReleaseInputs = {
+    def issues = []
+    def adIds = [
+            AdMobAppId: 'ca-app-pub-\\d{16}~\\d{10}',
+            adBannerID: 'ca-app-pub-\\d{16}/\\d{10}',
+            adInterstitialID: 'ca-app-pub-\\d{16}/\\d{10}',
+            adAppOpenID: 'ca-app-pub-\\d{16}/\\d{10}',
+            adRewardedID: 'ca-app-pub-\\d{16}/\\d{10}'
+    ]
+    adIds.each { key, pattern ->
+        def value = localProperties.getProperty(key)?.trim()
+        if (!value || !value.matches(pattern) || value.contains('3940256099942544')) {
+            issues << "${key} must be a production AdMob ID in local.properties"
+        }
+    }
+    if (!hasKeystore) {
+        issues << 'keystore.properties is missing (or set RELEASE_KEYSTORE_PROPERTIES)'
+    } else {
+        ['storeFile', 'storePassword', 'keyAlias', 'keyPassword'].each { key ->
+            if (!keystoreProperties.getProperty(key)?.trim()) {
+                issues << "keystore.properties is missing ${key}"
+            }
+        }
+        def storeFilePath = keystoreProperties.getProperty('storeFile')
+        if (storeFilePath && !file(storeFilePath).isFile()) {
+            issues << 'keystore.properties storeFile does not exist'
+        }
+    }
+    if (!issues.isEmpty()) {
+        throw new GradleException('Release inputs invalid: ' + issues.join('; '))
+    }
 }
 
 android {
@@ -45,7 +71,7 @@ android {
         versionName = "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders = [AdMobAppId: AdMobAppId]
+        buildConfigField "int", "CONSENT_DEBUG_GEOGRAPHY", "0"
     }
 
     signingConfigs {
@@ -62,22 +88,23 @@ android {
     buildTypes {
         release {
             if (hasKeystore) signingConfig = signingConfigs.release
+            manifestPlaceholders = [AdMobAppId: releaseAdValue('AdMobAppId')]
             minifyEnabled = true
             shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
 
-            resValue "string", "adBannerID", localProperties['adBannerID'] ?: ""
-            resValue "string", "adInterstitialID", localProperties['adInterstitialID'] ?: ""
-            resValue "string", "adAppOpenID", localProperties['adAppOpenID'] ?: ""
-            resValue "string", "adNativeID", localProperties['adNativeID'] ?: ""
-            resValue "string", "adRewardedID", localProperties['adRewardedID'] ?: ""
+            resValue "string", "adBannerID", releaseAdValue('adBannerID')
+            resValue "string", "adInterstitialID", releaseAdValue('adInterstitialID')
+            resValue "string", "adAppOpenID", releaseAdValue('adAppOpenID')
+            resValue "string", "adRewardedID", releaseAdValue('adRewardedID')
         }
 
         debug {
+            buildConfigField "int", "CONSENT_DEBUG_GEOGRAPHY", "0"
+            manifestPlaceholders = [AdMobAppId: 'ca-app-pub-3940256099942544~3347511713']
             resValue "string", "adBannerID", "ca-app-pub-3940256099942544/6300978111"
             resValue "string", "adInterstitialID", "ca-app-pub-3940256099942544/1033173712"
-            resValue "string", "adNativeID", "ca-app-pub-3940256099942544/2247696110"
             resValue "string", "adAppOpenID", "ca-app-pub-3940256099942544/3419835294"
             resValue "string", "adRewardedID", "ca-app-pub-3940256099942544/5224354917"
         }
@@ -96,6 +123,12 @@ android {
     }
 }
 
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    doFirst {
+        validateReleaseInputs()
+    }
+}
+
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.8.0'
@@ -108,15 +141,13 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
     implementation project(':shinebuttonlib')
     implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'com.squareup.okhttp3:okhttp:5.5.0'
     implementation 'com.squareup.picasso:picasso:2.8'
 
     implementation 'com.android.billingclient:billing:9.1.0'
-
-    implementation platform('com.google.firebase:firebase-bom:34.17.0')
-    implementation 'com.google.firebase:firebase-analytics'
 
     def lifecycle_version = "2.11.0"
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
@@ -126,7 +157,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
 
-    implementation 'com.google.ads.mediation:facebook:6.22.0.0'
 }
 
 tasks.register('validateCatalog', Exec) {

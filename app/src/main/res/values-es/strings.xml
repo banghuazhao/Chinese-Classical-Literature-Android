@@ -42,6 +42,16 @@
     <string name="rate_dialog_rate">Valorar</string>
     <string name="reader_options">Opciones de lectura</string>
     <string name="MoreApps">Más aplicaciones</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="privacy_settings">Configuración de privacidad</string>
+    <string name="age_gate_title">Elige tu grupo de edad</string>
+    <string name="age_gate_message">Elige la opción que corresponda. Puedes cambiarla más tarde en Más.</string>
+    <string name="age_gate_close_notice">Si cambias a Menor de 18 años, la app se cerrará para detener los servicios de anuncios. Ábrela de nuevo para seguir leyendo.</string>
+    <string name="age_gate_under_18">Menor de 18 años</string>
+    <string name="age_gate_adult">18 años o más</string>
+    <string name="age_group">Grupo de edad</string>
+    <string name="age_gate_save_failed">No se pudo guardar el grupo de edad. Inténtalo de nuevo.</string>
+    <string name="privacy_policy_unavailable">No hay ningún navegador disponible para abrir la política de privacidad.</string>
     <string name="Background">Fondo</string>
     <string name="BackgroundDefault">Predeterminado</string>
     <string name="BackgroundDarkMode">Modo oscuro</string>

@@ -42,6 +42,16 @@
     <string name="rate_dialog_rate">Bewerten</string>
     <string name="reader_options">Leseoptionen</string>
     <string name="MoreApps">Weitere Apps</string>
+    <string name="privacy_policy">Datenschutzerklärung</string>
+    <string name="privacy_settings">Datenschutzeinstellungen</string>
+    <string name="age_gate_title">Wähle deine Altersgruppe</string>
+    <string name="age_gate_message">Wähle die passende Altersgruppe. Du kannst sie später unter Mehr ändern.</string>
+    <string name="age_gate_close_notice">Wenn du zu „Unter 18“ wechselst, wird die App beendet, damit die Werbedienste gestoppt werden. Öffne sie erneut, um weiterzulesen.</string>
+    <string name="age_gate_under_18">Unter 18</string>
+    <string name="age_gate_adult">18 oder älter</string>
+    <string name="age_group">Altersgruppe</string>
+    <string name="age_gate_save_failed">Die Altersgruppe konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
+    <string name="privacy_policy_unavailable">Zum Öffnen der Datenschutzerklärung ist kein Browser verfügbar.</string>
     <string name="Background">Hintergrund</string>
     <string name="BackgroundDefault">Standard</string>
     <string name="BackgroundDarkMode">Dunkelmodus</string>

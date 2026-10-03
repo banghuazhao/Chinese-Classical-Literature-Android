@@ -26,10 +26,29 @@ public class TinyDB {
     private SharedPreferences preferences;
     private String DEFAULT_APP_IMAGEDATA_DIRECTORY;
     private String lastImagePath = "";
+    private static final String READER_PREFERENCES = "ReaderLibrary";
 
     public TinyDB(Context appContext) {
-        preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
+        preferences = appContext.getSharedPreferences(READER_PREFERENCES, Context.MODE_PRIVATE);
+        migrateReaderValues(appContext);
         context = appContext;
+    }
+
+    /** Keep the two reader values without backing up UMP's default preferences. */
+    private void migrateReaderValues(Context appContext) {
+        synchronized (TinyDB.class) {
+            if (preferences.getBoolean("reader_values_migrated", false)) {
+                return;
+            }
+            SharedPreferences legacy = PreferenceManager.getDefaultSharedPreferences(appContext);
+            SharedPreferences.Editor editor = preferences.edit();
+            for (String key : new String[]{"BookLibrary", "search_recent_queries"}) {
+                if (!preferences.contains(key) && legacy.contains(key)) {
+                    editor.putString(key, legacy.getString(key, ""));
+                }
+            }
+            editor.putBoolean("reader_values_migrated", true).commit();
+        }
     }
 
 

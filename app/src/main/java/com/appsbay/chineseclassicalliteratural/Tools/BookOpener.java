@@ -20,12 +20,16 @@ public final class BookOpener {
     }
 
     public static void open(Context context, Book book) {
-        if (book == null || context == null) {
+        if (book == null || context == null || !BookStore.shared.isAvailable(context, book)) {
             return;
         }
         if (book.isCollection()) {
             Intent intent = new Intent(context, BooksListActivity.class);
-            intent.putParcelableArrayListExtra(EXTRA_BOOKS, BookStore.shared.getBooksForCollection(book));
+            java.util.ArrayList<Book> available = new java.util.ArrayList<>();
+            for (Book item : BookStore.shared.getBooksForCollection(book)) {
+                if (BookStore.shared.isAvailable(context, item)) available.add(item);
+            }
+            intent.putParcelableArrayListExtra(EXTRA_BOOKS, available);
             intent.putExtra(EXTRA_COLLECTION_BOOK, book);
             context.startActivity(intent);
         } else {
@@ -36,7 +40,7 @@ public final class BookOpener {
     }
 
     public static void continueReading(Context context, Book book) {
-        if (book == null || context == null) {
+        if (book == null || context == null || !BookStore.shared.isAvailable(context, book)) {
             return;
         }
         if (book.isCollection()) {

@@ -42,6 +42,16 @@
     <string name="rate_dialog_rate">評分</string>
     <string name="reader_options">閱讀設定</string>
     <string name="MoreApps">更多應用程式</string>
+    <string name="privacy_policy">私隱政策</string>
+    <string name="privacy_settings">私隱設定</string>
+    <string name="age_gate_title">選擇年齡組別</string>
+    <string name="age_gate_message">請選擇適合你的選項。你稍後可在「更多」中更改。</string>
+    <string name="age_gate_close_notice">改為「未滿18歲」後，應用程式會關閉以停止廣告服務。重新開啟即可繼續閱讀。</string>
+    <string name="age_gate_under_18">未滿18歲</string>
+    <string name="age_gate_adult">18歲或以上</string>
+    <string name="age_group">年齡組別</string>
+    <string name="age_gate_save_failed">無法儲存年齡組別，請重試。</string>
+    <string name="privacy_policy_unavailable">沒有可開啟私隱政策的瀏覽器。</string>
     <string name="Background">背景</string>
     <string name="BackgroundDefault">預設</string>
     <string name="BackgroundDarkMode">深色模式</string>

@@ -17,12 +17,14 @@ import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
 import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
 import com.appsbay.chineseclassicalliteratural.View.BackgroundThemeAdapter;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class ImagesActivity extends AppCompatActivity {
+
+    private FrameLayout adContainer;
 
     private static final List<String> THEMES = Arrays.asList(
             "system", "default", "white", "dark", "green",
@@ -35,14 +37,13 @@ public class ImagesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_images);
 
         View root = findViewById(R.id.images_root);
-        AdView adView = findViewById(R.id.adViewBanner);
-        View adContainer = findViewById(R.id.ad_container);
+        adContainer = findViewById(R.id.ad_container);
         RecyclerView grid = findViewById(R.id.images_grid);
 
         ScreenChrome.setup(this, root, adContainer);
         setTitle(R.string.Background);
 
-        AdsHelper.bindBanner(adView);
+        AdsHelper.bindBanner(adContainer);
 
         SharedPreferences preferences = getSharedPreferences("Color Preference", Context.MODE_PRIVATE);
         String selected = preferences.getString("background", "system");
@@ -54,6 +55,12 @@ public class ImagesActivity extends AppCompatActivity {
         root.setBackgroundColor(MyColor.getBackgroundColor(this));
         MyImage.setBackgroundImage(this, root);
         grid.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+    }
+
+    @Override
+    protected void onDestroy() {
+        AdsHelper.releaseBanner(adContainer);
+        super.onDestroy();
     }
 
     private void onThemeSelected(String themeId) {

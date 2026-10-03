@@ -13,6 +13,9 @@ public class MenuItem {
     public static final int ACTION_BACKGROUND = 8;
     public static final int ACTION_LANGUAGE = 9;
     public static final int ACTION_SCRIPT = 10;
+    public static final int ACTION_PRIVACY_POLICY = 11;
+    public static final int ACTION_PRIVACY_SETTINGS = 12;
+    public static final int ACTION_AGE_GROUP = 13;
 
     private final int action;
     private String itemName;

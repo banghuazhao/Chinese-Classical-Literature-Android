@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Allow only reader-owned data. Billing, ad state and SDK files are excluded. -->
+    <include domain="database" path="reader_marks.db" />
+    <include domain="sharedpref" path="ReaderLibrary.xml" />
+    <include domain="sharedpref" path="Bookmarks.xml" />
+    <include domain="sharedpref" path="Continue Reading.xml" />
+    <include domain="sharedpref" path="Reading Progress.xml" />
+    <include domain="sharedpref" path="Font Preference.xml" />
+    <include domain="sharedpref" path="Color Preference.xml" />
+    <include domain="sharedpref" path="Language Preference.xml" />
+    <include domain="sharedpref" path="reader_speech.xml" />
+</full-backup-content>

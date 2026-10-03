@@ -21,16 +21,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.appsbay.chineseclassicalliteratural.R;
 import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.Tools.AdsHelper;
+import com.appsbay.chineseclassicalliteratural.Tools.AgeGate;
 import com.appsbay.chineseclassicalliteratural.Tools.BillingManager;
 import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.LocalBroadcastHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.LocaleHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
+import com.appsbay.chineseclassicalliteratural.Tools.PrivacyManager;
 import com.appsbay.chineseclassicalliteratural.Tools.RewardedAdHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.TemporaryAdFree;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class MenuFragment extends Fragment {
     private final ArrayList<MenuItem> menuItems = new ArrayList<>();
     private RecyclerView recyclerView;
     private MenuItemRecyclerViewAdapter adapter;
-    private AdView mAdView;
+    private FrameLayout mAdContainer;
     private Context mContext;
 
     @Nullable
@@ -50,8 +52,8 @@ public class MenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_menu, container, false);
         mContext = requireContext();
 
-        mAdView = view.findViewById(R.id.adViewBanner);
-        AdsHelper.bindBanner(mAdView);
+        mAdContainer = view.findViewById(R.id.ad_container);
+        AdsHelper.bindBanner(mAdContainer);
 
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -64,7 +66,8 @@ public class MenuFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
-        BillingManager.get(mContext).setPurchaseListener(new BillingManager.PurchaseListener() {
+        if (AgeGate.isAdult(mContext)) {
+            BillingManager.get(mContext).setPurchaseListener(new BillingManager.PurchaseListener() {
             @Override
             public void onPurchaseCompleted(boolean restored) {
                 View anchor = recyclerView != null ? recyclerView : view;
@@ -89,7 +92,8 @@ public class MenuFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 }
             }
-        });
+            });
+        }
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(adFreeReceiver,
                 new IntentFilter(LocalBroadcastHelper.ACTION_AD_FREE_CHANGED));
@@ -103,6 +107,7 @@ public class MenuFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        AdsHelper.bindBanner(mAdContainer);
         ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
@@ -115,10 +120,32 @@ public class MenuFragment extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        FrameLayout container = mAdContainer;
+        if (container != null) {
+            if (hidden) {
+                AdsHelper.releaseBanner(container);
+            } else {
+                container.post(() -> AdsHelper.bindBanner(container));
+            }
+        }
+        if (!hidden && mContext != null) {
+            buildMenuItems();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    @Override
     public void onDestroyView() {
+        AdsHelper.releaseBanner(mAdContainer);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(adFreeReceiver);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(backgroundReceiver);
-        BillingManager.get(mContext).setPurchaseListener(null);
+        if (AgeGate.isAdult(mContext)) {
+            BillingManager.get(mContext).setPurchaseListener(null);
+        }
         super.onDestroyView();
     }
 
@@ -144,12 +171,29 @@ public class MenuFragment extends Fragment {
         menuItems.add(new MenuItem(MenuItem.ACTION_SHARE,
                 getString(R.string.Share),
                 MyImage.changeDrawableColor(mContext, R.drawable.icon_share2, tint)));
-        if (BillingManager.get(mContext).isProductAvailable() || BillingManager.get(mContext).isAdFree()) {
+        menuItems.add(new MenuItem(MenuItem.ACTION_PRIVACY_POLICY,
+                getString(R.string.privacy_policy),
+                MyImage.changeDrawableColor(mContext, R.drawable.nav_info, tint)));
+        int ageGroup = AgeGate.getGroup(mContext);
+        String ageLabel = ageGroup == AgeGate.UNKNOWN ? getString(R.string.age_group)
+                : getString(R.string.age_group) + " · " + getString(
+                        ageGroup == AgeGate.ADULT ? R.string.age_gate_adult : R.string.age_gate_under_18);
+        menuItems.add(new MenuItem(MenuItem.ACTION_AGE_GROUP, ageLabel,
+                MyImage.changeDrawableColor(mContext, R.drawable.nav_note, tint)));
+        if (AgeGate.isAdult(mContext)
+                && PrivacyManager.get(mContext).isPrivacyOptionsRequired()) {
+            menuItems.add(new MenuItem(MenuItem.ACTION_PRIVACY_SETTINGS,
+                    getString(R.string.privacy_settings),
+                    MyImage.changeDrawableColor(mContext, R.drawable.nav_note, tint)));
+        }
+        if (AgeGate.isAdult(mContext)
+                && (BillingManager.get(mContext).isProductAvailable()
+                || BillingManager.get(mContext).isAdFree())) {
             menuItems.add(new MenuItem(MenuItem.ACTION_REMOVE_ADS,
                     BillingManager.get(mContext).getRemoveAdsTitle(mContext),
                     MyImage.changeDrawableColor(mContext, R.drawable.nav_bookmark, tint)));
         }
-        if (!BillingManager.get(mContext).isAdFree()) {
+        if (AgeGate.isAdult(mContext) && !BillingManager.get(mContext).isAdFree()) {
             if (!getString(R.string.adRewardedID).isEmpty() || TemporaryAdFree.isActive(mContext)) {
                 String watchTitle = TemporaryAdFree.isActive(mContext)
                         ? getString(R.string.temp_ad_free_active)
@@ -165,9 +209,11 @@ public class MenuFragment extends Fragment {
                         MyImage.changeDrawableColor(mContext, R.drawable.nav_bookmark_circle, tint)));
             }
         }
-        menuItems.add(new MenuItem(MenuItem.ACTION_MORE_APPS,
-                getString(R.string.MoreApps),
-                MyImage.changeDrawableColor(mContext, R.drawable.ic_tab_more, tint)));
+        if (AgeGate.isAdult(mContext)) {
+            menuItems.add(new MenuItem(MenuItem.ACTION_MORE_APPS,
+                    getString(R.string.MoreApps),
+                    MyImage.changeDrawableColor(mContext, R.drawable.ic_tab_more, tint)));
+        }
     }
 
     private void refreshAfterAdFreeChange() {
@@ -175,7 +221,7 @@ public class MenuFragment extends Fragment {
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
-        AdsHelper.bindBanner(mAdView);
+        AdsHelper.bindBanner(mAdContainer);
     }
 
     private final BroadcastReceiver adFreeReceiver = new BroadcastReceiver() {

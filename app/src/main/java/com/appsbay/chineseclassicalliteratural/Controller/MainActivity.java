@@ -2,6 +2,7 @@ package com.appsbay.chineseclassicalliteratural.Controller;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +13,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.appsbay.chineseclassicalliteratural.Controller.Menu.MenuFragment;
 import com.appsbay.chineseclassicalliteratural.R;
 import com.appsbay.chineseclassicalliteratural.Tools.BookMotion;
+import com.appsbay.chineseclassicalliteratural.Tools.AgeGate;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
+import com.appsbay.chineseclassicalliteratural.Tools.PrivacyManager;
 import com.appsbay.chineseclassicalliteratural.Tools.RateItDialogFragment;
 import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation_main);
         MyColor.applyBottomNavigation(this, bottomNav);
+        View adNavigationSpacer = findViewById(R.id.ad_navigation_spacer);
+        adNavigationSpacer.setBackgroundColor(MyColor.getBottomBarColor(this));
         ScreenChrome.setupHome(
                 this,
                 toolbar,
@@ -61,8 +66,15 @@ public class MainActivity extends AppCompatActivity {
         setDestinationTitle(titleRes);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        if (savedInstanceState == null) {
-            RateItDialogFragment.show(this, getSupportFragmentManager());
+        if (AgeGate.getGroup(this) == AgeGate.UNKNOWN) {
+            AgeGate.showChoice(this, false, group -> {
+                if (AgeGate.saveGroup(this, group)) {
+                    // Rebuild the hidden More tab with the chosen age group's controls.
+                    recreate();
+                }
+            });
+        } else if (AgeGate.isAdult(this)) {
+            startAdultPrivacy(savedInstanceState == null);
         }
 
         bottomNav.setOnNavigationItemReselectedListener(item -> {
@@ -78,6 +90,14 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             BookMotion.revealOnce(findViewById(R.id.fragment_container));
         }
+    }
+
+    private void startAdultPrivacy(boolean firstLaunch) {
+        PrivacyManager.get(this).start(this, () -> {
+            if (firstLaunch && !isFinishing() && !isDestroyed()) {
+                RateItDialogFragment.show(this, getSupportFragmentManager());
+            }
+        });
     }
 
     private void restoreOrCreateFragments(Bundle savedInstanceState) {

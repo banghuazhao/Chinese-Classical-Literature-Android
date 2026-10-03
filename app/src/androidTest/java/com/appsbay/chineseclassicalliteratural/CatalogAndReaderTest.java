@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.SystemClock;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +39,8 @@ public class CatalogAndReaderTest {
         BookStore.shared.fetchFromLocal(context);
         LiteraryCopy.shared.fetchFromLocal(context);
         List<Book> books = BookStore.shared.getAllBooks(context);
-        assertTrue(books.size() >= 118);
+        // Restricted readers see 49 works per script; adults see all 52.
+        assertTrue(books.size() >= 98);
         assertEquals(BookStore.shared.getBooks(context).size() * 2, books.size());
         for (Book book : books) {
             assertFalse(book.getName(), book.getName().trim().isEmpty());
@@ -66,8 +69,23 @@ public class CatalogAndReaderTest {
         }
         assertNotNull(simplified);
         assertNotNull(traditional);
-        openFirstChapter(instrumentation, context, simplified);
-        openFirstChapter(instrumentation, context, traditional);
+        SharedPreferences language = context.getSharedPreferences("Language Preference", Context.MODE_PRIVATE);
+        boolean hadLanguage = language.contains("language");
+        int previousLanguage = language.getInt("language", 0);
+        try {
+            BookStore.shared.setTraditional(context, false);
+            openFirstChapter(instrumentation, context, simplified);
+            BookStore.shared.setTraditional(context, true);
+            openFirstChapter(instrumentation, context, traditional);
+        } finally {
+            SharedPreferences.Editor editor = language.edit();
+            if (hadLanguage) {
+                editor.putInt("language", previousLanguage);
+            } else {
+                editor.remove("language");
+            }
+            editor.apply();
+        }
     }
 
     private void openFirstChapter(Instrumentation instrumentation, Context context, Book book) {
@@ -86,10 +104,15 @@ public class CatalogAndReaderTest {
             }
             assertTrue(book.getName(), list.getAdapter().getItemCount() > 1);
             instrumentation.runOnMainSync(() -> list.scrollToPosition(1));
-            instrumentation.waitForIdleSync();
-            RecyclerView.ViewHolder row = list.findViewHolderForAdapterPosition(1);
-            assertNotNull(row);
-            instrumentation.runOnMainSync(() -> row.itemView.performClick());
+            RecyclerView.ViewHolder[] row = new RecyclerView.ViewHolder[1];
+            long rowDeadline = SystemClock.uptimeMillis() + 5000;
+            while (SystemClock.uptimeMillis() < rowDeadline && row[0] == null) {
+                instrumentation.waitForIdleSync();
+                instrumentation.runOnMainSync(() -> row[0] = list.findViewHolderForAdapterPosition(1));
+                if (row[0] == null) Thread.sleep(50);
+            }
+            assertNotNull(book.getName() + " chapter row was not attached", row[0]);
+            instrumentation.runOnMainSync(() -> row[0].itemView.performClick());
             Activity reader = instrumentation.waitForMonitorWithTimeout(monitor, 10000);
             assertNotNull("Reader did not open " + book.getName(), reader);
             instrumentation.waitForIdleSync();
@@ -102,6 +125,7 @@ public class CatalogAndReaderTest {
         } finally {
             instrumentation.removeMonitor(monitor);
             instrumentation.runOnMainSync(chapters::finish);
+            instrumentation.waitForIdleSync();
         }
     }
 }

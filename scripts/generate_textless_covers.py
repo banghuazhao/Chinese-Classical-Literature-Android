@@ -21,7 +21,7 @@ CATALOGS = [ASSETS / "bookInfo-simplified.json", ASSETS / "bookInfo-traditional.
 # Existing illustrated covers were checked at full size and have no lettering.
 KEEP = {
     "三国演义", "吕氏春秋", "唐诗三百首", "大唐西域记", "文子",
-    "文心雕龙", "楚辞", "水浒传", "红楼梦", "西游记", "诗经",
+    "文心雕龙", "楚辞", "水浒传", "西游记", "诗经",
 }
 
 PALETTES = [

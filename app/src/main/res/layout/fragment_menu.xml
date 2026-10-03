@@ -14,11 +14,9 @@
         android:overScrollMode="never"
         android:paddingBottom="@dimen/space_16" />
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adViewBanner"
+    <FrameLayout
+        android:id="@+id/ad_container"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:adSize="BANNER"
-        app:adUnitId="@string/adBannerID" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

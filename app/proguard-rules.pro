@@ -8,8 +8,8 @@
 -keepclassmembers,allowobfuscation class * {
   @com.google.gson.annotations.SerializedName <fields>;
 }
--keep class com.appsbay.novelshub.Model.** { *; }
--keep class com.appsbay.novelshub.data.** { *; }
+-keep class com.appsbay.chineseclassicalliteratural.Model.** { *; }
+-keep class com.appsbay.chineseclassicalliteratural.data.** { *; }
 
 # Parcelable CREATORs
 -keepclassmembers class * implements android.os.Parcelable {

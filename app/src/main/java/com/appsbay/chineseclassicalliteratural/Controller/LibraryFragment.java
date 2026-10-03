@@ -46,7 +46,7 @@ import com.appsbay.chineseclassicalliteratural.Tools.SearchPanelBinder;
 import com.appsbay.chineseclassicalliteratural.View.BooksLibraryListRecyclerViewAdapter;
 import com.appsbay.chineseclassicalliteratural.viewmodel.LibraryViewModel;
 import com.appsbay.chineseclassicalliteratural.viewmodel.NovelsHubViewModelFactory;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
     RecyclerView booksListRecyclerView;
     BooksLibraryListRecyclerViewAdapter booksListRecyclerViewAdapter;
     private Menu menu;
-    private AdView mAdView;
+    private FrameLayout mAdContainer;
     Context mContext;
     private LibraryViewModel libraryViewModel;
     private ItemTouchHelper itemTouchHelper;
@@ -92,8 +92,8 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
 
         mContext = getContext();
 
-        mAdView = view.findViewById(R.id.adViewBanner);
-        AdsHelper.bindBanner(mAdView);
+        mAdContainer = view.findViewById(R.id.ad_container);
+        AdsHelper.bindBanner(mAdContainer);
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -242,11 +242,13 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
     }
 
     @Override
-    public void onDestroy() {
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(adFreeReceiver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(offlineDownloadReceiver);
-        super.onDestroy();
+    public void onDestroyView() {
+        AdsHelper.releaseBanner(mAdContainer);
+        mAdContainer = null;
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(adFreeReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(offlineDownloadReceiver);
+        super.onDestroyView();
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -262,7 +264,7 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
     private BroadcastReceiver adFreeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            AdsHelper.bindBanner(mAdView);
+            AdsHelper.bindBanner(mAdContainer);
         }
     };
 
@@ -276,8 +278,21 @@ public class LibraryFragment extends Fragment implements BooksLibraryListRecycle
     };
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        FrameLayout container = mAdContainer;
+        if (container == null) return;
+        if (hidden) {
+            AdsHelper.releaseBanner(container);
+        } else {
+            container.post(() -> AdsHelper.bindBanner(container));
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        AdsHelper.bindBanner(mAdContainer);
         libraryViewModel.refreshLibrary();
     }
 

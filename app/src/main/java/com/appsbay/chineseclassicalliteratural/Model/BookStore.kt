@@ -2,24 +2,36 @@ package com.appsbay.chineseclassicalliteratural.Model
 
 import android.content.Context
 import android.os.Build
+import com.appsbay.chineseclassicalliteratural.Tools.AgeGate
 import com.google.gson.JsonParser
 import com.google.gson.JsonObject
 import java.io.IOException
 import java.util.Locale
 
 class BookStore {
+    private val adultOnlyIds = setOf("水浒传", "封神演义", "隋唐演义")
     private val simplified = ArrayList<Book>()
     private val traditional = ArrayList<Book>()
     private val missingTraditionalChapters = HashMap<String, List<Int>>()
 
     fun getBooks(context: Context): ArrayList<Book> =
-        if (usesTraditional(context)) traditional else simplified
+        ArrayList((if (usesTraditional(context)) traditional else simplified).filter {
+            isAvailable(context, it)
+        })
 
     fun getAllBooks(context: Context): ArrayList<Book> =
         ArrayList<Book>(simplified.size + traditional.size).apply {
             addAll(getBooks(context))
-            addAll(if (usesTraditional(context)) simplified else traditional)
+            addAll((if (usesTraditional(context)) simplified else traditional).filter {
+                isAvailable(context, it)
+            })
         }
+
+    fun isAvailable(context: Context, book: Book): Boolean = isAvailableId(context, book.id)
+
+    fun isAvailableId(context: Context, id: String): Boolean =
+        (simplified.any { it.id == id } || traditional.any { it.id == id }) &&
+            (AgeGate.isAdult(context) || id !in adultOnlyIds)
 
     fun getBooksForCollection(book: Book): ArrayList<Book> =
         ArrayList(getAllBooksForLoadedCatalog().filter { it.parent == book.name })

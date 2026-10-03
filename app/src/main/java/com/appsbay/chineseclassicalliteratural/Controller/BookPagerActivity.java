@@ -34,7 +34,6 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AlertDialog;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.OnBackPressedCallback;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -94,11 +93,9 @@ public class BookPagerActivity extends AppCompatActivity {
     private long readingStartedAt;
     private int restoredScrollY;
     private boolean didScroll;
-    private boolean leavingWithAd;
     private int chapterIndex = -1;
     private int totalChapters = 0;
     private boolean chapterTransitionRunning;
-    private OnBackPressedCallback backPressedCallback;
     private ReaderViewModel readerViewModel;
 
     private static final int CHROME_SCROLL_THRESHOLD_PX = 12;
@@ -122,7 +119,7 @@ public class BookPagerActivity extends AppCompatActivity {
         Intent intent = getIntent();
         bookChapter = intent.getParcelableExtra("bookChapter");
         book = intent.getParcelableExtra("book");
-        if (book == null || bookChapter == null) {
+        if (book == null || bookChapter == null || !BookStore.shared.isAvailable(this, book)) {
             // Nothing to read without a chapter (e.g. a stale or restored intent).
             finish();
             return;
@@ -207,14 +204,6 @@ public class BookPagerActivity extends AppCompatActivity {
         BookMotion.attachPressEffect(prevChapterButton);
         BookMotion.attachPressEffect(nextChapterButton);
         BookMotion.revealOnce(pageContent);
-
-        backPressedCallback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                handleReaderBack();
-            }
-        };
-        getOnBackPressedDispatcher().addCallback(this, backPressedCallback);
 
         configColor();
 
@@ -435,6 +424,33 @@ public class BookPagerActivity extends AppCompatActivity {
         if (chapterTransitionRunning) {
             return;
         }
+        if (!previous && Boolean.TRUE.equals(readerViewModel.getCanGoNext().getValue())) {
+            saveReadingProgress();
+            stopSpeaking();
+            chapterTransitionRunning = true;
+            final boolean[] continued = {false};
+            Runnable continueToNext = () -> {
+                if (continued[0]) return;
+                continued[0] = true;
+                chapterTransitionRunning = false;
+                if (!isFinishing() && !isDestroyed()) {
+                    changeChapter(false);
+                }
+            };
+            if (AdCoordinator.get(this).maybeShowInterstitialAfterReading(
+                    this, readingStartedAt, didScroll, continueToNext)) {
+                return;
+            }
+            continueToNext.run();
+            return;
+        }
+        changeChapter(previous);
+    }
+
+    private void changeChapter(boolean previous) {
+        if (chapterTransitionRunning) {
+            return;
+        }
         saveReadingProgress();
         stopSpeaking();
         BookChapter adjacent = previous
@@ -453,6 +469,7 @@ public class BookPagerActivity extends AppCompatActivity {
             renderChapterText();
             updateChapterProgressLabel();
             didScroll = false;
+            readingStartedAt = System.currentTimeMillis();
             setReaderChromeVisible(true, false);
             scrollView.post(() -> {
                 suppressChromeScroll = true;
@@ -580,28 +597,6 @@ public class BookPagerActivity extends AppCompatActivity {
             return;
         }
         readerViewModel.saveReadingProgress(scrollFraction());
-    }
-
-    private void handleReaderBack() {
-        if (leavingWithAd) {
-            return;
-        }
-        stopSpeaking();
-        leavingWithAd = AdCoordinator.get(this).maybeShowInterstitialAfterReading(
-                this,
-                readingStartedAt,
-                didScroll,
-                this::completeBackNavigation);
-        if (!leavingWithAd) {
-            completeBackNavigation();
-        }
-    }
-
-    private void completeBackNavigation() {
-        if (backPressedCallback != null) {
-            backPressedCallback.setEnabled(false);
-        }
-        getOnBackPressedDispatcher().onBackPressed();
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -151,7 +152,10 @@ public class ReaderCollectionActivity extends AppCompatActivity {
     private void showMarks() {
         results.removeAllViews();
         message.setVisibility(View.VISIBLE);
-        List<ReaderMarks.Mark> saved = marks.all();
+        List<ReaderMarks.Mark> saved = new ArrayList<>();
+        for (ReaderMarks.Mark mark : marks.all()) {
+            if (BookStore.shared.isAvailableId(this, mark.bookId)) saved.add(mark);
+        }
         message.setText(saved.isEmpty() ? R.string.no_saved_passages : R.string.saved_passages_hint);
         for (ReaderMarks.Mark mark : saved) {
             String detail = mark.quote.isEmpty() ? getString(R.string.position_bookmark)
@@ -186,6 +190,7 @@ public class ReaderCollectionActivity extends AppCompatActivity {
     }
 
     private void openMark(ReaderMarks.Mark mark) {
+        if (!BookStore.shared.isAvailableId(this, mark.bookId)) return;
         Book target = null;
         for (Book variant : BookStore.shared.variantsForId(mark.bookId)) {
             if (BookStore.shared.isTraditional(variant) == mark.traditional) target = variant;
@@ -194,6 +199,7 @@ public class ReaderCollectionActivity extends AppCompatActivity {
     }
 
     private void open(Book book, int index, int offset, float fraction, int length) {
+        if (!BookStore.shared.isAvailable(this, book)) return;
         progress.setVisibility(View.VISIBLE);
         worker.execute(() -> {
             try {

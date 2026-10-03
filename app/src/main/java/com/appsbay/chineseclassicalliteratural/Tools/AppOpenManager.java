@@ -26,6 +26,8 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, D
     private static final String LOG_TAG = "AppOpenManager";
 
     private AppOpenAd appOpenAd = null;
+    private int loadGeneration;
+    private boolean loadingAd;
     private Activity currentActivity;
     private static boolean isShowingAd = false;
 
@@ -65,13 +67,15 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, D
     /** Request an ad */
     public void fetchAd() {
         if (!AdsHelper.shouldShowAds(myApplication)) {
-            appOpenAd = null;
+            clearLoadedAd();
             return;
         }
         // Have unused ad, no need to fetch another.
-        if (isAdAvailable()) {
+        if (isAdAvailable() || loadingAd) {
             return;
         }
+        loadingAd = true;
+        final int generation = ++loadGeneration;
 
         loadCallback =
                 new AppOpenAd.AppOpenAdLoadCallback() {
@@ -82,6 +86,9 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, D
                      */
                     @Override
                     public void onAdLoaded(@NonNull AppOpenAd ad) {
+                        if (generation != loadGeneration) return;
+                        loadingAd = false;
+                        if (!AdsHelper.shouldShowAds(myApplication)) return;
                         AppOpenManager.this.appOpenAd = ad;
                         AppOpenManager.this.loadTime = (new Date()).getTime();
                     }
@@ -93,12 +100,19 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, D
                      */
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        if (generation != loadGeneration) return;
+                        loadingAd = false;
                         Log.d(LOG_TAG, loadAdError.toString());
                     }
 
                 };
+        String adUnitId = getAdUnitId();
+        if (adUnitId.isEmpty()) {
+            loadingAd = false;
+            return;
+        }
         AdRequest request = getAdRequest();
-        AppOpenAd.load(myApplication, getAdUnitId(), request, loadCallback);
+        AppOpenAd.load(myApplication, adUnitId, request, loadCallback);
 
     }
 
@@ -108,11 +122,14 @@ public class AppOpenManager implements Application.ActivityLifecycleCallbacks, D
     }
 
     private String getAdUnitId() {
-        String id = myApplication.getString(R.string.adAppOpenID);
-        if (id != null && !id.isEmpty()) {
-            return id;
-        }
-        return "ca-app-pub-4766086782456413/8912407535";
+        return myApplication.getString(R.string.adAppOpenID);
+    }
+
+    public void clearLoadedAd() {
+        ++loadGeneration;
+        appOpenAd = null;
+        loadTime = 0;
+        loadingAd = false;
     }
 
     /** Utility method that checks if ad exists and can be shown. */

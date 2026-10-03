@@ -35,7 +35,7 @@ import com.appsbay.chineseclassicalliteratural.View.BookChapterRecyclerViewAdapt
 import com.appsbay.chineseclassicalliteratural.data.BookLoadError;
 import com.appsbay.chineseclassicalliteratural.viewmodel.ChapterViewModel;
 import com.appsbay.chineseclassicalliteratural.viewmodel.NovelsHubViewModelFactory;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class BookChapterActivity extends AppCompatActivity {
     TextView errorMessage;
     MaterialButton errorRetry;
 
-    private AdView mAdView;
+    private FrameLayout mAdContainer;
     private boolean autoOpenChapter;
     private boolean openedChapter;
     private ChapterViewModel chapterViewModel;
@@ -69,8 +69,8 @@ public class BookChapterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_chapter);
 
-        mAdView = findViewById(R.id.adViewBanner);
-        AdsHelper.bindBanner(mAdView);
+        mAdContainer = findViewById(R.id.ad_container);
+        AdsHelper.bindBanner(mAdContainer);
         ScreenChrome.setup(this, findViewById(R.id.screen_root), findViewById(R.id.ad_container));
 
         loadingContainer = findViewById(R.id.book_chapter_loading);
@@ -87,7 +87,7 @@ public class BookChapterActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         book = intent.getParcelableExtra(BookOpener.EXTRA_BOOK);
-        if (book == null) {
+        if (book == null || !BookStore.shared.isAvailable(this, book)) {
             book = intent.getParcelableExtra("book");
         }
         if (book == null) {
@@ -173,6 +173,7 @@ public class BookChapterActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        AdsHelper.releaseBanner(mAdContainer);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(backgroundReceiver);
         super.onDestroy();
     }

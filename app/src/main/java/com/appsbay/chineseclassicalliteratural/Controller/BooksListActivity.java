@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.Model.Book;
+import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.Model.BookCategory;
 import com.appsbay.chineseclassicalliteratural.Model.BookCategoryStore;
 import com.appsbay.chineseclassicalliteratural.Model.BookGenres;
@@ -35,7 +36,7 @@ import com.appsbay.chineseclassicalliteratural.Tools.SearchHistory;
 import com.appsbay.chineseclassicalliteratural.Tools.SearchPanelBinder;
 import com.appsbay.chineseclassicalliteratural.View.BooksGridRecyclerViewAdapter;
 import com.appsbay.chineseclassicalliteratural.View.BooksListRecyclerViewAdapter;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class BooksListActivity extends AppCompatActivity {
     private RecyclerView.Adapter<?> booksAdapter;
     private Filterable booksFilterable;
 
-    private AdView mAdView;
+    private FrameLayout mAdContainer;
     private ChipGroup genreChipGroup;
     private View genreChipsScroll;
     private String selectedCategory;
@@ -65,8 +66,8 @@ public class BooksListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
 
-        mAdView = findViewById(R.id.adViewBanner);
-        AdsHelper.bindBanner(mAdView);
+        mAdContainer = findViewById(R.id.ad_container);
+        AdsHelper.bindBanner(mAdContainer);
         ScreenChrome.setup(this, findViewById(R.id.screen_root), findViewById(R.id.ad_container));
 
         Intent intent = getIntent();
@@ -74,7 +75,16 @@ public class BooksListActivity extends AppCompatActivity {
         if (books == null) {
             books = new ArrayList<>();
         }
+        ArrayList<Book> availableBooks = new ArrayList<>();
+        for (Book item : books) {
+            if (BookStore.shared.isAvailable(this, item)) availableBooks.add(item);
+        }
+        books = availableBooks;
         collectionBook = intent.getParcelableExtra(BookOpener.EXTRA_COLLECTION_BOOK);
+        if (collectionBook != null && !BookStore.shared.isAvailable(this, collectionBook)) {
+            finish();
+            return;
+        }
         selectedCategory = intent.getStringExtra(BookOpener.EXTRA_CATEGORY_NAME);
         String incomingQuery = intent.getStringExtra(BookOpener.EXTRA_SEARCH_QUERY);
         pendingSearchQuery = incomingQuery == null ? "" : incomingQuery.trim();
@@ -247,6 +257,7 @@ public class BooksListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        AdsHelper.releaseBanner(mAdContainer);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(offlineDownloadReceiver);
         super.onDestroy();
     }

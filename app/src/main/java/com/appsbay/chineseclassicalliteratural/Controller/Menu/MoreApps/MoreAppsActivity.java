@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.R;
+import com.appsbay.chineseclassicalliteratural.Tools.AgeGate;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
 import com.appsbay.chineseclassicalliteratural.Tools.ScreenChrome;
@@ -20,6 +21,10 @@ public class MoreAppsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!AgeGate.isAdult(this)) {
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_more_apps);
 
         View root = findViewById(R.id.more_apps_root);

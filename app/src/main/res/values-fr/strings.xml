@@ -42,6 +42,16 @@
     <string name="rate_dialog_rate">Noter</string>
     <string name="reader_options">Options de lecture</string>
     <string name="MoreApps">Plus d’applications</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="privacy_settings">Paramètres de confidentialité</string>
+    <string name="age_gate_title">Choisissez votre tranche d’âge</string>
+    <string name="age_gate_message">Choisissez l’option qui vous correspond. Vous pourrez la modifier plus tard dans Plus.</string>
+    <string name="age_gate_close_notice">Si vous passez à Moins de 18 ans, l’application se fermera pour arrêter les services publicitaires. Rouvrez-la pour continuer à lire.</string>
+    <string name="age_gate_under_18">Moins de 18 ans</string>
+    <string name="age_gate_adult">18 ans ou plus</string>
+    <string name="age_group">Tranche d’âge</string>
+    <string name="age_gate_save_failed">Impossible d’enregistrer votre tranche d’âge. Réessayez.</string>
+    <string name="privacy_policy_unavailable">Aucun navigateur disponible pour ouvrir la politique de confidentialité.</string>
     <string name="Background">Arrière-plan</string>
     <string name="BackgroundDefault">Par défaut</string>
     <string name="BackgroundDarkMode">Mode sombre</string>

@@ -66,6 +66,10 @@ public final class ScreenChrome {
         if (bottomNav != null) {
             bottomNav.setBackgroundColor(MyColor.getBottomBarColor(activity));
         }
+        View adNavigationSpacer = activity.findViewById(R.id.ad_navigation_spacer);
+        if (adNavigationSpacer != null) {
+            adNavigationSpacer.setBackgroundColor(MyColor.getBottomBarColor(activity));
+        }
         applyBarAppearance(activity);
     }
 

@@ -42,6 +42,7 @@ public final class AdCoordinator {
 
     private InterstitialAd interstitialAd;
     private boolean loadingInterstitial;
+    private int loadGeneration;
     private boolean showingFullscreen;
     private boolean hasEnteredForeground;
     private long appWentBackgroundAt;
@@ -117,22 +118,32 @@ public final class AdCoordinator {
             return;
         }
         loadingInterstitial = true;
+        final int generation = ++loadGeneration;
         InterstitialAd.load(appContext, adUnitId, new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd ad) {
-                        interstitialAd = ad;
+                        if (generation != loadGeneration) return;
                         loadingInterstitial = false;
+                        if (!AdsHelper.shouldShowAds(appContext)) return;
+                        interstitialAd = ad;
                         Log.d(LOG_TAG, "Interstitial preloaded");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        if (generation != loadGeneration) return;
                         interstitialAd = null;
                         loadingInterstitial = false;
                         Log.i(LOG_TAG, loadAdError.getMessage());
                     }
                 });
+    }
+
+    public void clearLoadedAd() {
+        ++loadGeneration;
+        interstitialAd = null;
+        loadingInterstitial = false;
     }
 
     /**

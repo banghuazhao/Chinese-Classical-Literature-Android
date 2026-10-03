@@ -42,6 +42,16 @@
     <string name="rate_dialog_rate">評価する</string>
     <string name="reader_options">表示設定</string>
     <string name="MoreApps">他のアプリ</string>
+    <string name="privacy_policy">プライバシーポリシー</string>
+    <string name="privacy_settings">プライバシー設定</string>
+    <string name="age_gate_title">年齢区分を選択</string>
+    <string name="age_gate_message">該当する項目を選択してください。後から「その他」で変更できます。</string>
+    <string name="age_gate_close_notice">「18歳未満」に変更すると、広告サービスを停止するためアプリが終了します。読み続けるには再度開いてください。</string>
+    <string name="age_gate_under_18">18歳未満</string>
+    <string name="age_gate_adult">18歳以上</string>
+    <string name="age_group">年齢区分</string>
+    <string name="age_gate_save_failed">年齢区分を保存できませんでした。もう一度お試しください。</string>
+    <string name="privacy_policy_unavailable">プライバシーポリシーを開くブラウザーがありません。</string>
     <string name="Background">背景</string>
     <string name="BackgroundDefault">デフォルト</string>
     <string name="BackgroundDarkMode">ダークモード</string>

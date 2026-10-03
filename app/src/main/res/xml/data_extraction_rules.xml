@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <!-- Android 12+: apply the same reader-only allowlist to cloud and device transfer. -->
+    <cloud-backup>
+        <include domain="database" path="reader_marks.db" />
+        <include domain="sharedpref" path="ReaderLibrary.xml" />
+        <include domain="sharedpref" path="Bookmarks.xml" />
+        <include domain="sharedpref" path="Continue Reading.xml" />
+        <include domain="sharedpref" path="Reading Progress.xml" />
+        <include domain="sharedpref" path="Font Preference.xml" />
+        <include domain="sharedpref" path="Color Preference.xml" />
+        <include domain="sharedpref" path="Language Preference.xml" />
+        <include domain="sharedpref" path="reader_speech.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="reader_marks.db" />
+        <include domain="sharedpref" path="ReaderLibrary.xml" />
+        <include domain="sharedpref" path="Bookmarks.xml" />
+        <include domain="sharedpref" path="Continue Reading.xml" />
+        <include domain="sharedpref" path="Reading Progress.xml" />
+        <include domain="sharedpref" path="Font Preference.xml" />
+        <include domain="sharedpref" path="Color Preference.xml" />
+        <include domain="sharedpref" path="Language Preference.xml" />
+        <include domain="sharedpref" path="reader_speech.xml" />
+    </device-transfer>
+</data-extraction-rules>

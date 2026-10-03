@@ -49,7 +49,7 @@ import com.appsbay.chineseclassicalliteratural.View.BooksListRecyclerViewAdapter
 import com.appsbay.chineseclassicalliteratural.View.BooksVerticalRecyclerViewAdapter;
 import com.appsbay.chineseclassicalliteratural.viewmodel.HomeViewModel;
 import com.appsbay.chineseclassicalliteratural.viewmodel.NovelsHubViewModelFactory;
-import com.google.android.gms.ads.AdView;
+import android.widget.FrameLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.ChipGroup;
 
@@ -65,7 +65,7 @@ public class BooksFragment extends Fragment {
     BooksListRecyclerViewAdapter booksListRecyclerViewAdapter;
     Integer viewFlipperChild;
     private Menu menu;
-    private AdView mAdView;
+    private FrameLayout mAdContainer;
     Context mContext;
     private HomeViewModel homeViewModel;
     private ChipGroup genreChipGroup;
@@ -96,8 +96,8 @@ public class BooksFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_books, container, false);
         mContext = getContext();
 
-        mAdView = view.findViewById(R.id.adViewBanner);
-        AdsHelper.bindBanner(mAdView);
+        mAdContainer = view.findViewById(R.id.ad_container);
+        AdsHelper.bindBanner(mAdContainer);
 
         genreChipsScroll = view.findViewById(R.id.genre_chips_include);
         genreChipGroup = view.findViewById(R.id.genre_chip_group);
@@ -280,11 +280,13 @@ public class BooksFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(adFreeReceiver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(offlineDownloadReceiver);
-        super.onDestroy();
+    public void onDestroyView() {
+        AdsHelper.releaseBanner(mAdContainer);
+        mAdContainer = null;
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(adFreeReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(offlineDownloadReceiver);
+        super.onDestroyView();
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -303,7 +305,7 @@ public class BooksFragment extends Fragment {
     private BroadcastReceiver adFreeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            AdsHelper.bindBanner(mAdView);
+            AdsHelper.bindBanner(mAdContainer);
         }
     };
 
@@ -320,8 +322,21 @@ public class BooksFragment extends Fragment {
     };
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        FrameLayout container = mAdContainer;
+        if (container == null) return;
+        if (hidden) {
+            AdsHelper.releaseBanner(container);
+        } else {
+            container.post(() -> AdsHelper.bindBanner(container));
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        AdsHelper.bindBanner(mAdContainer);
         homeViewModel.loadHomeData();
     }
 
@@ -361,11 +376,7 @@ public class BooksFragment extends Fragment {
             if (searchItem != null) {
                 SearchChrome.tintMenuIcon(searchItem, mContext);
             }
-            if (viewFlipper.getDisplayedChild() == 0) {
-                menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_list_bullet, MyColor.getTitleTextColor(mContext)));
-            } else {
-                menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_grid22, MyColor.getTitleTextColor(mContext)));
-            }
+            updateLayoutToggleIcon(menu);
         }
 
         BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation_main);
@@ -453,11 +464,7 @@ public class BooksFragment extends Fragment {
             }
         });
 
-        if (viewFlipper.getDisplayedChild() == 0) {
-            menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_list_bullet, MyColor.getTitleTextColor(mContext)));
-        } else {
-            menu.getItem(1).setIcon(changeDrawableColor(mContext, R.drawable.nav_grid22, MyColor.getTitleTextColor(mContext)));
-        }
+        updateLayoutToggleIcon(menu);
 
         if (!initial.isEmpty()) {
             searchMenuItem.expandActionView();
@@ -492,5 +499,19 @@ public class BooksFragment extends Fragment {
         if (current != null) {
             current.smoothScrollToPosition(0);
         }
+    }
+
+    private void updateLayoutToggleIcon(@Nullable Menu targetMenu) {
+        if (targetMenu == null || viewFlipper == null) {
+            return;
+        }
+        // A theme broadcast can reach Home while another tab owns the menu.
+        MenuItem layoutItem = targetMenu.findItem(R.id.home_menu_action_change);
+        if (layoutItem == null) {
+            return;
+        }
+        int icon = viewFlipper.getDisplayedChild() == 0
+                ? R.drawable.nav_list_bullet : R.drawable.nav_grid22;
+        layoutItem.setIcon(changeDrawableColor(mContext, icon, MyColor.getTitleTextColor(mContext)));
     }
 }

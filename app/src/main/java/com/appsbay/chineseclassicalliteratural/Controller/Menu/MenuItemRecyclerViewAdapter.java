@@ -3,6 +3,8 @@ package com.appsbay.chineseclassicalliteratural.Controller.Menu;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +15,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.appsbay.chineseclassicalliteratural.Controller.ImagesActivity;
+import com.appsbay.chineseclassicalliteratural.Controller.MyApplication;
 import com.appsbay.chineseclassicalliteratural.Controller.Menu.MoreApps.MoreAppsActivity;
 import com.appsbay.chineseclassicalliteratural.Model.BookStore;
 import com.appsbay.chineseclassicalliteratural.R;
 import com.appsbay.chineseclassicalliteratural.Tools.BillingManager;
+import com.appsbay.chineseclassicalliteratural.Tools.AdsHelper;
+import com.appsbay.chineseclassicalliteratural.Tools.AgeGate;
 import com.appsbay.chineseclassicalliteratural.Tools.DialogChrome;
 import com.appsbay.chineseclassicalliteratural.Tools.HelperFunctions;
 import com.appsbay.chineseclassicalliteratural.Tools.LocaleHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.MyColor;
 import com.appsbay.chineseclassicalliteratural.Tools.MyImage;
+import com.appsbay.chineseclassicalliteratural.Tools.PrivacyManager;
 import com.appsbay.chineseclassicalliteratural.Tools.RewardedAdHelper;
 import com.appsbay.chineseclassicalliteratural.Tools.StoreHelper;
 
@@ -84,21 +90,68 @@ public class MenuItemRecyclerViewAdapter extends RecyclerView.Adapter<MenuItemRe
                     }
                     break;
                 case MenuItem.ACTION_REMOVE_ADS:
-                    if (context instanceof Activity) {
+                    if (context instanceof Activity && AgeGate.isAdult(context)) {
                         BillingManager.get(context).launchRemoveAdsPurchase((Activity) context);
                     }
                     break;
                 case MenuItem.ACTION_WATCH_AD_FREE:
-                    if (context instanceof Activity) {
+                    if (context instanceof Activity && AgeGate.isAdult(context)) {
                         RewardedAdHelper.get(context)
                                 .showForTwentyFourHourAdFree((Activity) context);
                     }
                     break;
                 case MenuItem.ACTION_RESTORE:
-                    BillingManager.get(context).restorePurchases();
+                    if (AgeGate.isAdult(context)) {
+                        BillingManager.get(context).restorePurchases();
+                    }
                     break;
                 case MenuItem.ACTION_MORE_APPS:
-                    context.startActivity(new Intent(context, MoreAppsActivity.class));
+                    if (AgeGate.isAdult(context)) {
+                        context.startActivity(new Intent(context, MoreAppsActivity.class));
+                    }
+                    break;
+                case MenuItem.ACTION_PRIVACY_POLICY:
+                    try {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://apps-bay.github.io/Apps-Bay-Website/privacy/")));
+                    } catch (ActivityNotFoundException | SecurityException e) {
+                        DialogChrome.snack(holder.itemView,
+                                context.getString(R.string.privacy_policy_unavailable));
+                    }
+                    break;
+                case MenuItem.ACTION_PRIVACY_SETTINGS:
+                    if (context instanceof Activity && AgeGate.isAdult(context)) {
+                        PrivacyManager.get(context).showPrivacyOptions((Activity) context);
+                    }
+                    break;
+                case MenuItem.ACTION_AGE_GROUP:
+                    if (context instanceof Activity) {
+                        Activity activity = (Activity) context;
+                        AgeGate.showChoice(activity, true, group -> {
+                            if (group == AgeGate.getGroup(activity)) return;
+                            if (!AgeGate.saveGroup(activity, group)) {
+                                DialogChrome.snack(holder.itemView,
+                                        activity.getString(R.string.age_gate_save_failed));
+                                return;
+                            }
+                            if (group == AgeGate.UNDER_18) {
+                                PrivacyManager.stopForRestrictedAge();
+                                ((MyApplication) activity.getApplication()).clearCachedAds();
+                                AdsHelper.refreshBanners();
+                                // The ads SDK cannot be unloaded after an adult session.
+                                // End this process so no initialized ad service survives
+                                // the switch to a restricted age group.
+                                activity.finishAffinity();
+                                android.os.Process.killProcess(android.os.Process.myPid());
+                            } else {
+                                PrivacyManager.get(activity).start(activity, () -> {
+                                    if (!activity.isFinishing() && !activity.isDestroyed()) {
+                                        activity.recreate();
+                                    }
+                                });
+                            }
+                        });
+                    }
                     break;
                 case MenuItem.ACTION_BACKGROUND:
                     context.startActivity(new Intent(context, ImagesActivity.class));

@@ -43,6 +43,16 @@
     <string name="speech_unavailable">Chinese speech is unavailable on this device</string>
 
     <string name="MoreApps">More Apps</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_settings">Privacy settings</string>
+    <string name="age_gate_title">Choose your age group</string>
+    <string name="age_gate_message">Choose the option that applies to you. You can change it later in More.</string>
+    <string name="age_gate_close_notice">Changing to Under 18 closes the app to stop ad services. Reopen it to keep reading.</string>
+    <string name="age_gate_under_18">Under 18</string>
+    <string name="age_gate_adult">18 or older</string>
+    <string name="age_group">Age group</string>
+    <string name="age_gate_save_failed">Could not save your age group. Please try again.</string>
+    <string name="privacy_policy_unavailable">No browser is available to open the privacy policy.</string>
     <string name="FinanceGo" translatable="false">Finance Go</string>
     <string name="FinanceGoDescription" translatable="false">Financial Reports, Stock Market Analysis and Stocks Investing</string>
     <string name="FinancialRatiosGo" translatable="false">Financial Ratios Go</string>
